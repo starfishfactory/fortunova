@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { ChildProcess } from 'child_process';
 import { callClaude, _resetSemaphore } from '@/services/llm.js';
+
+type ExecFileCallback = (error: NodeJS.ErrnoException | null, stdout: string, stderr: string) => void;
 
 // child_process mock
 vi.mock('child_process', () => ({
@@ -22,8 +25,8 @@ describe('callClaude', () => {
 
   it('정상적으로 Claude CLI 응답을 반환한다', async () => {
     mockExecFile.mockImplementation((_cmd, _args, _opts, callback) => {
-      (callback as Function)(null, '운세 결과입니다', '');
-      return {} as any;
+      (callback as ExecFileCallback)(null, '운세 결과입니다', '');
+      return {} as ChildProcess;
     });
 
     const result = await callClaude('테스트 프롬프트');
@@ -39,10 +42,10 @@ describe('callClaude', () => {
 
   it('타임아웃 시 에러를 던진다', async () => {
     mockExecFile.mockImplementation((_cmd, _args, _opts, callback) => {
-      const error = new Error('Command timed out');
-      (error as any).killed = true;
-      (callback as Function)(error, '', '');
-      return {} as any;
+      const error: NodeJS.ErrnoException & { killed?: boolean } = new Error('Command timed out');
+      error.killed = true;
+      (callback as ExecFileCallback)(error, '', '');
+      return {} as ChildProcess;
     });
 
     await expect(callClaude('테스트')).rejects.toThrow('Claude CLI 타임아웃');
@@ -50,10 +53,10 @@ describe('callClaude', () => {
 
   it('프로세스 에러 시 에러를 던진다', async () => {
     mockExecFile.mockImplementation((_cmd, _args, _opts, callback) => {
-      const error = new Error('Command failed');
-      (error as any).code = 1;
-      (callback as Function)(error, '', 'some error');
-      return {} as any;
+      const error: NodeJS.ErrnoException = new Error('Command failed');
+      error.code = '1';
+      (callback as ExecFileCallback)(error, '', 'some error');
+      return {} as ChildProcess;
     });
 
     await expect(callClaude('테스트')).rejects.toThrow('Claude CLI 에러');
@@ -61,16 +64,16 @@ describe('callClaude', () => {
 
   it('빈 응답 시 에러를 던진다', async () => {
     mockExecFile.mockImplementation((_cmd, _args, _opts, callback) => {
-      (callback as Function)(null, '', '');
-      return {} as any;
+      (callback as ExecFileCallback)(null, '', '');
+      return {} as ChildProcess;
     });
 
     await expect(callClaude('테스트')).rejects.toThrow('Claude CLI 빈 응답');
   });
 
   it('세마포어가 동시 호출을 1개로 제한한다', async () => {
-    let resolveFirst: Function;
-    let resolveSecond: Function;
+    let resolveFirst: () => void;
+    let resolveSecond: () => void;
 
     const callOrder: string[] = [];
 
@@ -78,18 +81,18 @@ describe('callClaude', () => {
       .mockImplementationOnce((_cmd, _args, _opts, callback) => {
         resolveFirst = () => {
           callOrder.push('first-done');
-          (callback as Function)(null, '첫 번째 결과', '');
+          (callback as ExecFileCallback)(null, '첫 번째 결과', '');
         };
         callOrder.push('first-start');
-        return {} as any;
+        return {} as ChildProcess;
       })
       .mockImplementationOnce((_cmd, _args, _opts, callback) => {
         resolveSecond = () => {
           callOrder.push('second-done');
-          (callback as Function)(null, '두 번째 결과', '');
+          (callback as ExecFileCallback)(null, '두 번째 결과', '');
         };
         callOrder.push('second-start');
-        return {} as any;
+        return {} as ChildProcess;
       });
 
     const promise1 = callClaude('첫 번째');

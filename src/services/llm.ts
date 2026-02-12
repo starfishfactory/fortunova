@@ -62,7 +62,7 @@ function executeClaudeCli(prompt: string): Promise<string> {
       { timeout: 30000 },
       (error, stdout, _stderr) => {
         if (error) {
-          if ((error as any).killed) {
+          if ((error as NodeJS.ErrnoException & { killed?: boolean }).killed) {
             reject(new Error('Claude CLI 타임아웃 (30초 초과)'));
             return;
           }

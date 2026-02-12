@@ -69,7 +69,7 @@ export async function getFortune(
   }
 
   // 3. 분석 → 프롬프트 → LLM → 파싱
-  const analysis = await system.analyze(input as Record<string, unknown>);
+  const analysis = await system.analyze(input as unknown as Record<string, unknown>);
   const prompt = system.buildPrompt(analysis, category);
   const llmResponse = await callClaude(prompt);
   const fortune = system.parseResult(llmResponse);
