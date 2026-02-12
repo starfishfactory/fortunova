@@ -558,3 +558,37 @@ sequenceDiagram
 ```
 
 ---
+
+## 4. 요구사항
+
+### 4.1 기능 요구사항 (FR)
+
+| ID | 요구사항 | 수용 기준 | 우선순위 |
+|----|---------|----------|---------|
+| FR-001 | 사주팔자 계산: 생년월일시 + 양/음력 + 성별을 입력받아 사주팔자(년주, 월주, 일주, 시주)를 계산한다 | **Given** 양력 1990-02-04 14시 남성 입력 **When** calculateFourPillars() 호출 **Then** 만세력닷컴 결과와 동일한 사주팔자 반환, 50+ 검증 케이스 전체 통과 | P0 |
+| FR-002 | 오늘의 운세 생성: 사주 분석 결과를 기반으로 Claude CLI를 호출하여 자연어 운세를 생성한다 | **Given** 유효한 SajuAnalysis 객체 **When** Claude CLI headless 호출 **Then** 500자 이상 2000자 이하의 한국어 운세 텍스트 반환, score(1-100) 포함 | P0 |
+| FR-003 | 운세 캐시: 동일 사용자+동일 날짜+동일 카테고리 조합에 대해 캐시를 반환한다 | **Given** 사용자 A가 2026-02-13 daily 운세를 이미 조회 **When** 같은 조건으로 재요청 **Then** Claude CLI 호출 없이 캐시된 결과 반환, fortune_cache 테이블에서 조회 | P0 |
+| FR-004 | 일일 무료 제한: 인증 사용자는 userId, 비인증 사용자는 IP+UA fingerprint 기준으로 하루 3회까지 무료 조회를 허용한다 | **Given** 비인증 사용자가 오늘 3회 조회 완료 **When** 4번째 조회 요청 **Then** 429 응답 + 구독 유도 UI 표시, daily_usage.count = 3 확인 | P0 |
+| FR-005 | 회원가입/로그인: 이메일+비밀번호 기반 회원가입 및 로그인 후 JWT 토큰을 발급한다 | **Given** 유효한 이메일/비밀번호 **When** POST /api/v1/auth/register **Then** 201 응답 + JWT 토큰 반환, 비밀번호는 bcrypt 해시 저장 | P1 |
+| FR-006 | 구독 관리: 월간/연간 구독 플랜을 선택하여 결제하면 무제한 운세 조회가 가능하다 | **Given** 인증된 사용자 + 유효한 결제 **When** POST /api/v1/subscription/subscribe **Then** subscriptions 테이블에 'active' 상태 생성, 이후 운세 조회 시 횟수 제한 미적용 | P2 |
+| FR-007 | 플러그인 운세 시스템 등록: FortuneSystem 인터페이스를 구현한 새로운 운세 체계를 registry에 등록하면 API에서 즉시 사용 가능하다 | **Given** TarotSystem이 FortuneSystem 인터페이스 구현 **When** registry.register(tarotSystem) 호출 **Then** POST /api/v1/fortune에서 systemId="tarot" 사용 가능, 기존 saju 코드 변경 없음 | P1 |
+| FR-008 | 생년월일시 입력 폼: 양력/음력 선택, 윤달 여부, 출생 시간(모름 선택 가능), 성별을 입력받는 반응형 웹 폼을 제공한다 | **Given** 모바일 브라우저(375px 너비) **When** 메인 페이지 접속 **Then** 모든 입력 필드가 뷰포트 내에 표시되고 터치 조작 가능 | P0 |
+
+### 4.2 비기능 요구사항 (NFR)
+
+| ID | 카테고리 | 요구사항 | 목표 수치 |
+|----|---------|---------|----------|
+| NFR-001 | 성능 | 운세 조회 API(캐시 미스) p95 응답시간 | 3초 이내 (Claude CLI 호출 포함) |
+| NFR-002 | 성능 | 운세 조회 API(캐시 히트) p95 응답시간 | 200ms 이내 |
+| NFR-003 | 성능 | 사주팔자 계산(calculateFourPillars) 실행시간 | 50ms 이내 |
+| NFR-004 | 메모리 | Docker 컨테이너 메모리 제한 | 512MB (hard limit) |
+| NFR-005 | 메모리 | Node.js 프로세스 RSS (유휴 상태) | 80-125MB |
+| NFR-006 | 메모리 | Docker 이미지 크기 | 100MB 이하 |
+| NFR-007 | 가용성 | 서비스 가동률 (월간) | 99% 이상 (NAS 단일 서버, ~7.3시간/월 다운타임 허용) |
+| NFR-008 | 정확도 | 사주팔자 계산 정확도 (50+ 교차 검증 케이스) | 100% |
+| NFR-009 | 보안 | 비밀번호 해싱 | bcrypt, salt rounds 12 |
+| NFR-010 | 보안 | JWT 토큰 만료시간 | 24시간 |
+| NFR-011 | 호환성 | 지원 브라우저 | Chrome 90+, Safari 15+, Firefox 90+, Samsung Internet 15+ |
+| NFR-012 | 동시성 | SQLite 동시 쓰기 처리 | WAL 모드 활성화, 최대 10 동시 요청 처리 |
+
+---
