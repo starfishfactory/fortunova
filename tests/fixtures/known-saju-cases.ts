@@ -3,7 +3,8 @@ import type { BirthInput, FourPillars, HeavenlyStem, EarthlyBranch } from '@/eng
 /**
  * 검증된 사주 케이스 인터페이스
  *
- * 만세력닷컴, 더큼만세력, 척척만세력 교차 검증 데이터
+ * 율리우스 적일(JD) 기반 알고리즘으로 계산 후,
+ * 만세력닷컴, 더큼만세력, 척척만세력 교차 검증된 데이터
  */
 export interface KnownSajuCase {
   /** 케이스 ID */
@@ -27,8 +28,8 @@ function gj(stem: HeavenlyStem, branch: EarthlyBranch) {
  * 교차 검증된 사주 정답 데이터
  *
  * Phase 1-1: 초기 10개 케이스
- * Phase 1-3: 30개로 확장 (KASI 데이터 기반)
- * Phase 1-4: 50+개로 확장 (전체 카테고리 충족)
+ * Phase 1-4: 알고리즘 검증 기반 교정
+ * TODO: 50+개로 확장 (전체 카테고리 충족)
  */
 export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
   // === 일반 케이스 ===
@@ -43,8 +44,8 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('경', '오'),
       month: gj('신', '사'),
-      day: gj('갑', '오'),
-      hour: gj('신', '미'),
+      day: gj('경', '진'),
+      hour: gj('계', '미'),
     },
   },
   {
@@ -58,8 +59,8 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('을', '축'),
       month: gj('을', '유'),
-      day: gj('기', '미'),
-      hour: gj('무', '진'),
+      day: gj('계', '유'),
+      hour: gj('병', '진'),
     },
   },
   {
@@ -73,15 +74,15 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('기', '묘'),   // 입춘 전이므로 1999년(기묘년)
       month: gj('병', '자'),
-      day: gj('갑', '오'),
-      hour: gj('경', '오'),
+      day: gj('무', '오'),
+      hour: gj('무', '오'),
     },
   },
 
   // === 입춘 경계 케이스 ===
   {
     id: 'ipchun-001',
-    description: '2024년 2월 4일 입춘 전 (양력) - 아직 계묘년',
+    description: '2024년 2월 3일 입춘 전 (양력) - 아직 계묘년',
     category: 'ipchun',
     input: {
       year: 2024, month: 2, day: 3, hour: 10,
@@ -90,13 +91,13 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('계', '묘'),
       month: gj('을', '축'),
-      day: gj('갑', '자'),
-      hour: gj('기', '사'),
+      day: gj('정', '유'),
+      hour: gj('을', '사'),
     },
   },
   {
     id: 'ipchun-002',
-    description: '2024년 2월 4일 입춘 후 (양력) - 갑진년 시작',
+    description: '2024년 2월 5일 입춘 후 (양력) - 갑진년 시작',
     category: 'ipchun',
     input: {
       year: 2024, month: 2, day: 5, hour: 10,
@@ -105,15 +106,15 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('갑', '진'),
       month: gj('병', '인'),
-      day: gj('병', '인'),
-      hour: gj('계', '사'),
+      day: gj('기', '해'),
+      hour: gj('기', '사'),
     },
   },
 
   // === 야자시 케이스 ===
   {
     id: 'midnight-001',
-    description: '1995년 7월 20일 23시 30분 (야자시) - 남성',
+    description: '1995년 7월 20일 23시 (야자시) - 남성',
     category: 'midnight',
     input: {
       year: 1995, month: 7, day: 20, hour: 23,
@@ -122,15 +123,15 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('을', '해'),
       month: gj('계', '미'),
-      day: gj('기', '사'),
-      hour: gj('갑', '자'),
+      day: gj('임', '자'),
+      hour: gj('경', '자'),
     },
   },
 
   // === 윤달 케이스 ===
   {
     id: 'leap-month-001',
-    description: '2023년 음력 윤2월 15일 12시 여성',
+    description: '2023년 음력 윤2월 15일 12시 여성 (양력 2023-04-05)',
     category: 'leap-month',
     input: {
       year: 2023, month: 2, day: 15, hour: 12,
@@ -139,8 +140,8 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('계', '묘'),
       month: gj('병', '진'),
-      day: gj('경', '자'),
-      hour: gj('임', '오'),
+      day: gj('계', '사'),
+      hour: gj('무', '오'),
     },
   },
 
@@ -156,8 +157,8 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('계', '묘'),
       month: gj('갑', '자'),
-      day: gj('임', '인'),
-      hour: gj('병', '오'),
+      day: gj('계', '해'),
+      hour: gj('무', '오'),
     },
   },
 
@@ -173,8 +174,8 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('경', '인'),
       month: gj('임', '오'),
-      day: gj('임', '오'),
-      hour: gj('계', '묘'),
+      day: gj('신', '묘'),
+      hour: gj('신', '묘'),
     },
   },
   {
@@ -188,8 +189,8 @@ export const KNOWN_SAJU_CASES: KnownSajuCase[] = [
     expected: {
       year: gj('경', '오'),
       month: gj('기', '묘'),
-      day: gj('경', '자'),
-      hour: gj('갑', '신'),
+      day: gj('갑', '오'),
+      hour: gj('임', '신'),
     },
   },
 ];
