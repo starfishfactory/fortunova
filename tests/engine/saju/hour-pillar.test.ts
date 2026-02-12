@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateHourPillar } from '@/engine/saju/hour-pillar.js';
-import type { HeavenlyStem } from '@/engine/types/index.js';
+
 import { KNOWN_SAJU_CASES } from '../../fixtures/known-saju-cases.js';
 
 describe('calculateHourPillar', () => {
