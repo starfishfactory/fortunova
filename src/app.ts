@@ -1,21 +1,17 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
+import pages from './routes/pages.js';
+import fortunePartials from './routes/partials/fortune.js';
 
 const app = new Hono();
 
 app.use('*', logger());
 
-app.get('/', (c) => {
-  return c.json({
-    name: 'Fortunova',
-    version: '0.1.0',
-    description: 'AI 사주/명리 운세 시스템',
-    status: 'ok',
-  });
-});
-
 app.get('/health', (c) => {
   return c.json({ status: 'ok' });
 });
+
+app.route('/', pages);
+app.route('/partials', fortunePartials);
 
 export default app;
