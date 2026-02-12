@@ -1,0 +1,48 @@
+{
+  "name": "fortunova",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AI 사주/명리 운세 시스템",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts'",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/starfishfactory/fortunova.git"
+  },
+  "keywords": ["saju", "fortune", "ai", "korean-astrology"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/starfishfactory/fortunova/issues"
+  },
+  "homepage": "https://github.com/starfishfactory/fortunova#readme",
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.2.3",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.6.2",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.11.9",
+    "jose": "^6.1.3",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@hono/node-server": "^1.19.9",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "drizzle-kit": "^0.31.9",
+    "eslint": "^9.39.2",
+    "tsx": "^4.21.0",
+    "vitest": "^4.0.18"
+  }
+}
