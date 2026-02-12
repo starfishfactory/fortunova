@@ -65,7 +65,7 @@ export const sajuSystem: FortuneSystem = {
 
   buildPrompt(analysis: SystemAnalysis, category: FortuneCategory): string {
     const data = analysis.data as unknown as SajuAnalysis;
-    const { fourPillars, tenGods, elementBalance, dayMasterStrength, majorFate } = data;
+    const { fourPillars, elementBalance, dayMasterStrength, majorFate } = data;
 
     const pillarStr = [
       `년주: ${fourPillars.year.stem}${fourPillars.year.branch}`,

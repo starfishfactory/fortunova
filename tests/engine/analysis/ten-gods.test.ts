@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { getTenGod, mapFourPillarsTenGods } from '@/engine/analysis/ten-gods.js';
 import type { HeavenlyStem, FourPillars } from '@/engine/types/index.js';
-import type { TenGod } from '@/engine/types/analysis.js';
+
 
 describe('ten-gods (십신)', () => {
   describe('getTenGod', () => {

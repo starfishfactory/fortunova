@@ -17,7 +17,7 @@ import { getNextGanJi, getPrevGanJi } from '../core/sixty-cycle.js';
 export function calculateMajorFate(
   fourPillars: FourPillars,
   gender: 'M' | 'F',
-  birthYear: number,
+  _birthYear: number,
 ): MajorFatePeriod[] {
   const yearStemYinYang = getStemYinYang(fourPillars.year.stem);
   const isYangYear = yearStemYinYang === '양';
