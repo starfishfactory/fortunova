@@ -27,3 +27,6 @@ export class FortuneSystemRegistry {
     return this.systems.has(id);
   }
 }
+
+/** 글로벌 싱글톤 레지스트리 */
+export const fortuneRegistry = new FortuneSystemRegistry();
