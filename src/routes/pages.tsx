@@ -1,9 +1,15 @@
 import { Hono } from 'hono';
+import { Layout } from '../views/layout.js';
+import { HomePage } from '../views/home.js';
 
 const pages = new Hono();
 
 pages.get('/', (c) => {
-  return c.html('<html><body><h1>Fortunova</h1></body></html>');
+  return c.html(
+    <Layout>
+      <HomePage />
+    </Layout>,
+  );
 });
 
 export default pages;
