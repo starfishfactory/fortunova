@@ -20,6 +20,21 @@ export async function rateLimitMiddleware(c: Context, next: Next) {
   const db = getDatabase();
   const date = new Date().toISOString().slice(0, 10);
 
+  // 활성 구독자는 무제한 허용
+  const user = c.get('user') as { userId: number } | undefined;
+  if (user) {
+    const activeSub = db.prepare(
+      `SELECT id FROM subscriptions WHERE user_id = ? AND status = 'active' AND end_date >= ?`,
+    ).get(user.userId, date);
+
+    if (activeSub) {
+      c.set('identifier', identifier);
+      c.set('identifierType', identifierType);
+      await next();
+      return;
+    }
+  }
+
   const usage = db.prepare(
     'SELECT count FROM daily_usage WHERE identifier = ? AND date = ?',
   ).get(identifier, date) as { count: number } | undefined;
