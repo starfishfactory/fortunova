@@ -112,7 +112,7 @@ describe('getFortune', () => {
       .mockReturnValueOnce({ count: 1 }); // usage 조회
     mockGetDatabase.mockReturnValue(mockDb as any);
 
-    const result = await getFortune(mockInput, 'daily', 'saju');
+    const result = await getFortune(mockInput, 'daily', 'saju', 'user:1', 'user');
 
     expect(result.cached).toBe(true);
     expect(result.fortune).toEqual(mockFortuneResult);
@@ -130,7 +130,7 @@ describe('getFortune', () => {
     const llmResponse = JSON.stringify(mockFortuneResult);
     mockCallClaude.mockResolvedValue(llmResponse);
 
-    const result = await getFortune(mockInput, 'daily', 'saju');
+    const result = await getFortune(mockInput, 'daily', 'saju', 'anon:abc123', 'anonymous');
 
     expect(result.cached).toBe(false);
     expect(result.fortune).toEqual(mockFortuneResult);
@@ -150,7 +150,7 @@ describe('getFortune', () => {
     const llmResponse = JSON.stringify(mockFortuneResult);
     mockCallClaude.mockResolvedValue(llmResponse);
 
-    await getFortune(mockInput, 'daily', 'saju');
+    await getFortune(mockInput, 'daily', 'saju', 'user:1', 'user');
 
     // fortune_cache INSERT와 daily_usage UPDATE가 호출됨
     const runCalls = mockDb._run.mock.calls;
@@ -158,7 +158,7 @@ describe('getFortune', () => {
   });
 
   it('존재하지 않는 시스템 ID로 호출하면 에러를 던진다', async () => {
-    await expect(getFortune(mockInput, 'daily', 'nonexistent'))
+    await expect(getFortune(mockInput, 'daily', 'nonexistent', 'user:1', 'user'))
       .rejects.toThrow('지원하지 않는 운세 시스템');
   });
 
@@ -172,9 +172,29 @@ describe('getFortune', () => {
     const llmResponse = JSON.stringify(mockFortuneResult);
     mockCallClaude.mockResolvedValue(llmResponse);
 
-    const result = await getFortune(mockInput, 'daily', 'saju');
+    const result = await getFortune(mockInput, 'daily', 'saju', 'anon:xyz', 'anonymous');
 
     // dailyFreeLimit(3) - 사용 후 count(1) = 2
     expect(result.remainingFreeCount).toBe(2);
+  });
+
+  it('identifier별로 사용량을 추적한다', async () => {
+    const mockDb = createMockDb();
+    mockDb._get
+      .mockReturnValueOnce(null)    // cache 미스
+      .mockReturnValueOnce(null);   // usage 없음
+    mockGetDatabase.mockReturnValue(mockDb as any);
+
+    const llmResponse = JSON.stringify(mockFortuneResult);
+    mockCallClaude.mockResolvedValue(llmResponse);
+
+    await getFortune(mockInput, 'daily', 'saju', 'user:42', 'user');
+
+    // daily_usage INSERT에 identifier가 'user:42'로 들어감
+    const runCalls = mockDb._run.mock.calls;
+    const insertCall = runCalls.find((call: any[]) =>
+      call[0] === 'user:42' && call[1] === 'user',
+    );
+    expect(insertCall).toBeTruthy();
   });
 });
