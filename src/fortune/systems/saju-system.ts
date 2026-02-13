@@ -6,6 +6,7 @@ import { mapFourPillarsTenGods } from '@/engine/analysis/ten-gods.js';
 import { calculateElementBalance } from '@/engine/analysis/element-balance.js';
 import { determineDayMasterStrength } from '@/engine/analysis/day-master-strength.js';
 import { calculateMajorFate } from '@/engine/saju/major-fate.js';
+import { determineUsefulGod } from '@/engine/analysis/useful-god.js';
 
 const CATEGORY_LABELS: Record<FortuneCategory, string> = {
   daily: '오늘의 운세',
@@ -48,12 +49,15 @@ export const sajuSystem: FortuneSystem = {
       birthInput.year,
     );
 
+    // 6. 용신 결정
+    const usefulGod = determineUsefulGod(fourPillars, elementBalance, dayMasterStrength);
+
     const analysis: SajuAnalysis = {
       fourPillars,
       tenGods,
       elementBalance,
       dayMasterStrength,
-      usefulGod: '목', // TODO: Phase 3에서 용신 로직 구현
+      usefulGod,
       majorFate,
     };
 

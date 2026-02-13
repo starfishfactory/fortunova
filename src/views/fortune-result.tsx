@@ -37,6 +37,49 @@ export function FortuneResultPartial({
         {cached && <p>캐시된 결과</p>}
         <p>오늘 남은 무료 횟수: {remainingFreeCount}회</p>
       </div>
+
+      {/* 대운/세운 차트 버튼 */}
+      <div class="mt-4 flex gap-2">
+        <button
+          hx-post="/partials/chart"
+          hx-target="#chart-area"
+          hx-indicator="#chart-loading"
+          hx-include="[name='year'],[name='month'],[name='day'],[name='hour'],[name='gender'],[name='calendarType'],[name='isLeapMonth']"
+          class="flex-1 bg-purple-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+        >
+          대운/세운 차트
+        </button>
+        <button
+          id="share-btn"
+          class="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+          onclick={`
+            fetch('/api/share', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                fortune: ${JSON.stringify(fortune)},
+                sajuSummary: ${JSON.stringify(sajuSummary)},
+                category: 'daily'
+              })
+            }).then(r => r.json()).then(d => {
+              if (d.shareUrl) {
+                const url = location.origin + d.shareUrl;
+                navigator.clipboard.writeText(url).then(() => {
+                  document.getElementById('share-btn').textContent = '링크 복사됨!';
+                }).catch(() => {
+                  prompt('공유 링크:', url);
+                });
+              }
+            });
+          `}
+        >
+          공유하기
+        </button>
+      </div>
+      <div id="chart-loading" class="htmx-indicator text-center py-2 text-purple-600 text-sm">
+        차트 로딩 중...
+      </div>
+      <div id="chart-area"></div>
     </div>
   );
 }

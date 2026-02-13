@@ -6,7 +6,9 @@ import { LoginPage } from '../views/login.js';
 import { RegisterPage } from '../views/register.js';
 import { SubscriptionPage } from '../views/subscription.js';
 import { MypagePage } from '../views/mypage.js';
+import { SharePage } from '../views/share.js';
 import { checkSubscription } from '@/services/subscription.js';
+import { getSharedFortune } from '@/services/share.js';
 
 const pages = new Hono<AppEnv>();
 
@@ -57,6 +59,31 @@ pages.get('/mypage', (c) => {
         subscription={sub ? { plan: sub.plan, status: sub.status, endDate: sub.endDate } : null}
       />
     </Layout>,
+  );
+});
+
+pages.get('/share/:id', (c) => {
+  const id = c.req.param('id');
+  const shared = getSharedFortune(id);
+
+  if (!shared) {
+    return c.html(
+      <Layout title="공유 운세">
+        <div class="mt-8 text-center">
+          <p class="text-gray-500">만료되었거나 존재하지 않는 공유 링크입니다.</p>
+          <a href="/" class="mt-4 inline-block text-indigo-600 hover:underline">홈으로 돌아가기</a>
+        </div>
+      </Layout>,
+    );
+  }
+
+  return c.html(
+    <SharePage
+      fortune={shared.fortune}
+      sajuSummary={shared.sajuSummary}
+      category={shared.category}
+      shareId={shared.id}
+    />,
   );
 });
 

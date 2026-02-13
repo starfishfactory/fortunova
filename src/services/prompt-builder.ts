@@ -32,6 +32,12 @@ export function buildFortunePrompt(
     formatPillar(fourPillars.hour),
   ].join(' ');
 
+  const usefulGodReasoning = dayMasterStrength === 'strong'
+    ? `신강(身强)하여 설기가 필요하므로 ${usefulGod}을(를) 용신으로 취용`
+    : dayMasterStrength === 'weak'
+      ? `신약(身弱)하여 보강이 필요하므로 ${usefulGod}을(를) 용신으로 취용`
+      : `중화(中和) 상태에서 부족한 ${usefulGod}을(를) 용신으로 취용`;
+
   return `당신은 한국 전통 사주/명리학 전문가입니다.
 다음 사주 분석 결과를 바탕으로 ${CATEGORY_LABELS[category]} 운세를 작성해주세요.
 
@@ -40,11 +46,12 @@ export function buildFortunePrompt(
 - 일간: ${fourPillars.day.stem} (${dayMasterElement})
 - 일간 강약: ${dayMasterStrength}
 - 오행 균형: 목${elementBalance['목']}% 화${elementBalance['화']}% 토${elementBalance['토']}% 금${elementBalance['금']}% 수${elementBalance['수']}%
-- 용신: ${usefulGod}
+- 용신: ${usefulGod} (${usefulGodReasoning})
 
 [요청]
 - 날짜: ${date}
 - 카테고리: ${CATEGORY_LABELS[category]}
+- 용신을 중심으로 운세를 분석해주세요
 - 500자~2000자 한국어로 작성
 - JSON 형식으로 응답: {"summary":"한줄요약", "detail":"상세설명", "score":1-100, "advice":"조언", "luckyColor":"행운의색", "luckyNumber":1-9}`;
 }
