@@ -37,6 +37,8 @@ export async function getFortune(
   input: BirthInput,
   category: FortuneCategory,
   systemId: string,
+  identifier: string,
+  identifierType: 'user' | 'anonymous',
 ): Promise<GetFortuneResult> {
   // 1. 시스템 조회
   const system = fortuneRegistry.get(systemId);
@@ -58,7 +60,7 @@ export async function getFortune(
     const sajuSummary = JSON.parse(cached.saju_data);
     const usage = db.prepare(
       'SELECT count FROM daily_usage WHERE identifier = ? AND date = ?',
-    ).get(cacheKey, date) as { count: number } | undefined;
+    ).get(identifier, date) as { count: number } | undefined;
 
     return {
       fortune,
@@ -97,17 +99,17 @@ export async function getFortune(
   // 5. 사용량 증가
   const usage = db.prepare(
     'SELECT count FROM daily_usage WHERE identifier = ? AND date = ?',
-  ).get(cacheKey, date) as { count: number } | undefined;
+  ).get(identifier, date) as { count: number } | undefined;
 
   if (usage) {
     db.prepare(
       'UPDATE daily_usage SET count = count + 1 WHERE identifier = ? AND date = ?',
-    ).run(cacheKey, date);
+    ).run(identifier, date);
   } else {
     db.prepare(
       `INSERT INTO daily_usage (identifier, identifier_type, date, count)
-       VALUES (?, 'anonymous', ?, 1)`,
-    ).run(cacheKey, date);
+       VALUES (?, ?, ?, 1)`,
+    ).run(identifier, identifierType, date);
   }
 
   const currentCount = (usage?.count ?? 0) + 1;
