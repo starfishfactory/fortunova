@@ -68,3 +68,15 @@ export const payments = sqliteTable('payments', {
 }, (table) => [
   index('idx_payments_user').on(table.userId),
 ]);
+
+// SDD: shared_fortunes 테이블
+export const sharedFortunes = sqliteTable('shared_fortunes', {
+  id: text('id').primaryKey(),
+  fortune: text('fortune').notNull(),
+  sajuSummary: text('saju_summary').notNull(),
+  category: text('category').notNull(),
+  createdAt: text('created_at').notNull(),
+  expiresAt: text('expires_at').notNull(),
+}, (table) => [
+  index('idx_shared_fortunes_expires').on(table.expiresAt),
+]);

@@ -64,6 +64,17 @@ const CREATE_TABLES_SQL = `
   );
 
   CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
+
+  CREATE TABLE IF NOT EXISTS shared_fortunes (
+    id TEXT PRIMARY KEY,
+    fortune TEXT NOT NULL,
+    saju_summary TEXT NOT NULL,
+    category TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_shared_fortunes_expires ON shared_fortunes(expires_at);
 `;
 
 export function migrateDatabase(db: Database.Database): void {

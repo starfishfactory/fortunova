@@ -7,9 +7,11 @@ import pages from './routes/pages.js';
 import fortunePartials from './routes/partials/fortune.js';
 import authPartials from './routes/partials/auth.js';
 import subscriptionPartials from './routes/partials/subscription.js';
+import chartPartials from './routes/partials/chart.js';
 import authApi from './routes/api/auth.js';
 import fortuneApi from './routes/api/fortune.js';
 import subscriptionApi from './routes/api/subscription.js';
+import shareApi from './routes/api/share.js';
 
 const app = new Hono();
 
@@ -30,12 +32,14 @@ app.route('/', pages);
 app.route('/partials', fortunePartials);
 app.route('/partials', authPartials);
 app.route('/partials', subscriptionPartials);
+app.route('/partials', chartPartials);
 
 // API 라우트 (fortune에만 rate-limit 적용)
 app.use('/api/fortune', rateLimitMiddleware);
 app.route('/api', authApi);
 app.route('/api', fortuneApi);
 app.route('/api', subscriptionApi);
+app.route('/api', shareApi);
 
 // PWA static files
 app.get('/manifest.json', serveStatic({ path: './public/manifest.json' }));
