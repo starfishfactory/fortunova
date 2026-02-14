@@ -20,6 +20,7 @@ export function Layout({ children, title }: { children: any; title?: string }) {
               <p class="text-sm text-indigo-200">AI 사주/명리 운세</p>
             </a>
             <nav class="flex items-center gap-3 text-sm">
+              <a href="/mypage" class="text-indigo-200 hover:text-white transition-colors">마이페이지</a>
               <a href="/login" class="text-indigo-200 hover:text-white transition-colors">로그인</a>
             </nav>
           </div>
