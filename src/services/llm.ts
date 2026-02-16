@@ -1,4 +1,5 @@
 import { execFile } from 'child_process';
+import { config } from '@/config.js';
 
 /**
  * 세마포어 - 동시 실행 수 제한 (메모리 제한 R-003)
@@ -42,6 +43,16 @@ export function _resetSemaphore(): void {
   claudeSemaphore.reset();
 }
 
+function buildCommand(prompt: string): { cmd: string; args: string[] } {
+  if (config.claudeMode === 'docker') {
+    return {
+      cmd: 'docker',
+      args: ['exec', config.claudeContainer, 'claude', '-p', prompt, '--output-format', 'text'],
+    };
+  }
+  return { cmd: 'claude', args: ['--print', '-p', prompt] };
+}
+
 /**
  * Claude CLI headless 모드로 프롬프트를 전송하고 응답을 받는다.
  */
@@ -55,15 +66,16 @@ export async function callClaude(prompt: string): Promise<string> {
 }
 
 function executeClaudeCli(prompt: string): Promise<string> {
+  const { cmd, args } = buildCommand(prompt);
   return new Promise((resolve, reject) => {
     execFile(
-      'claude',
-      ['--print', '-p', prompt],
-      { timeout: 30000 },
+      cmd,
+      args,
+      { timeout: config.claudeTimeout },
       (error, stdout, _stderr) => {
         if (error) {
           if ((error as NodeJS.ErrnoException & { killed?: boolean }).killed) {
-            reject(new Error('Claude CLI 타임아웃 (30초 초과)'));
+            reject(new Error(`Claude CLI 타임아웃 (${config.claudeTimeout / 1000}초 초과)`));
             return;
           }
           reject(new Error(`Claude CLI 에러: ${error.message}`));
