@@ -1,0 +1,11 @@
+services:
+  fortunova:
+    environment:
+      - CLAUDE_MODE=local
+    volumes:
+      - fortunova-data:/app/data
+
+networks:
+  gossip-network:
+    external: false
+    driver: bridge
