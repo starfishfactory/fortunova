@@ -1,25 +1,40 @@
-version: '3.8'
-
 services:
   fortunova:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    image: fortunova:latest
     container_name: fortunova
     restart: unless-stopped
     ports:
       - '3000:3000'
     volumes:
       - fortunova-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - NODE_ENV=production
       - DATABASE_PATH=/app/data/fortunova.db
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - CLAUDE_MODE=docker
+      - CLAUDE_CONTAINER=${CLAUDE_CONTAINER:-claude-api}
+      - CLAUDE_TIMEOUT=${CLAUDE_TIMEOUT:-60000}
+    networks:
+      - gossip-network
     deploy:
       resources:
         limits:
           memory: 512M
           cpus: '2'
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 volumes:
   fortunova-data:
+
+networks:
+  gossip-network:
+    external: true

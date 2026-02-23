@@ -40,4 +40,29 @@ describe('config', () => {
 
     expect(config.jwtSecret).toBe('my-production-secret');
   });
+
+  it('claudeMode 기본값은 local이다', async () => {
+    const { config } = await import('../src/config.js');
+
+    expect(config.claudeMode).toBe('local');
+  });
+
+  it('환경변수로 CLAUDE_MODE를 docker로 설정한다', async () => {
+    process.env = { ...originalEnv, CLAUDE_MODE: 'docker' };
+    const { config } = await import('../src/config.js');
+
+    expect(config.claudeMode).toBe('docker');
+  });
+
+  it('claudeContainer 기본값은 claude-api이다', async () => {
+    const { config } = await import('../src/config.js');
+
+    expect(config.claudeContainer).toBe('claude-api');
+  });
+
+  it('claudeTimeout 기본값은 60000이다', async () => {
+    const { config } = await import('../src/config.js');
+
+    expect(config.claudeTimeout).toBe(60000);
+  });
 });
