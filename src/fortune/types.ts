@@ -75,12 +75,12 @@ export interface DetailedFortuneResult extends FortuneResult {
     career: SubFortune;
   };
   elementExplanation: string;
-  lucky: LuckyInfo;
-  cautions: string;
-  monthlyTrend: MonthlyTrend[];
-  compatibilityTip: string;
-  proverb: string;
-  majorFateInterpretation: string;
+  lucky?: LuckyInfo;
+  cautions?: string;
+  monthlyTrend?: MonthlyTrend[];
+  compatibilityTip?: string;
+  proverb?: string;
+  majorFateInterpretation?: string;
 }
 
 /**
