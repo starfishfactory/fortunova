@@ -37,7 +37,7 @@ export function Layout({ children, title }: { children: any; title?: string }) {
           }`,
         }} />
         {/* Custom Styles (after Tailwind) */}
-        <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href="/public/styles.css" />
       </head>
       <body class="min-h-screen font-sans text-gray-200">
         {/* Aurora animated background */}
