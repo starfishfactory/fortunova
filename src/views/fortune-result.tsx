@@ -21,16 +21,19 @@ export function FortuneResultPartial({
   remainingFreeCount,
 }: FortuneResultProps) {
   return (
-    <div class="bg-white rounded-xl shadow-lg p-6 mt-4">
+    <div class="glass-card p-6 mt-4 fortune-reveal">
       <div class="text-center mb-4">
-        <div class="text-4xl font-bold text-indigo-600">{fortune.score}점</div>
+        <div class="score-glow inline-block px-6 py-3">
+          <span class="text-4xl font-serif font-bold text-gold-400">{fortune.score}점</span>
+        </div>
       </div>
-      <h2 class="text-lg font-bold mb-2">{fortune.summary}</h2>
-      <p class="text-gray-700 whitespace-pre-line">{fortune.detail}</p>
-      <div class="mt-4 p-3 bg-indigo-50 rounded-lg">
-        <p>{fortune.advice}</p>
-        {fortune.luckyColor && <p>행운의 색: {fortune.luckyColor}</p>}
-        {fortune.luckyNumber && <p>행운의 숫자: {fortune.luckyNumber}</p>}
+      <h2 class="text-lg font-bold text-gray-100 mb-2">{fortune.summary}</h2>
+      <p class="text-gray-300 whitespace-pre-line leading-relaxed">{fortune.detail}</p>
+      <hr class="divider-gold" />
+      <div class="p-4 rounded-lg" style="background: rgba(212, 168, 83, 0.08); border: 1px solid rgba(212, 168, 83, 0.2);">
+        <p class="text-gray-200">{fortune.advice}</p>
+        {fortune.luckyColor && <p class="text-gold-300 text-sm mt-1">행운의 색: {fortune.luckyColor}</p>}
+        {fortune.luckyNumber && <p class="text-gold-300 text-sm mt-1">행운의 숫자: {fortune.luckyNumber}</p>}
       </div>
       <div class="mt-4 text-sm text-gray-500">
         <p>사주: {sajuSummary.fourPillars}</p>
