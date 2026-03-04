@@ -30,7 +30,6 @@ export function HomePage() {
       <form
         hx-post="/partials/fortune-result"
         hx-target="#result"
-        hx-indicator="#loading"
         class="glass-card p-6 space-y-5"
       >
         {/* 생년월일 */}
@@ -137,8 +136,8 @@ export function HomePage() {
       </form>
       </div>
 
-      {/* 로딩 인디케이터 */}
-      <div id="loading" class="htmx-indicator">
+      {/* 로딩 인디케이터 — JS로 표시/숨김 제어 */}
+      <div id="loading" style="display:none">
         <div class="loading-container text-center py-8">
           <div class="orb-glow mx-auto mb-4"></div>
           <p class="text-gold-400 font-medium mb-2">운세를 분석하고 있습니다...</p>

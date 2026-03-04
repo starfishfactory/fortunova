@@ -155,12 +155,18 @@ export function Layout({ children, title }: { children: any; title?: string }) {
     var action = form.getAttribute('hx-post') || '';
     if (action.includes('fortune-detail')) return;
     collapseForm(form);
+    var ld = document.getElementById('loading');
+    if (ld) ld.style.display = 'block';
     startTips();
   });
   document.addEventListener('htmx:afterRequest', function(evt) {
+    var ld = document.getElementById('loading');
+    if (ld) ld.style.display = 'none';
     stopTips();
   });
   document.addEventListener('htmx:responseError', function() {
+    var ld = document.getElementById('loading');
+    if (ld) ld.style.display = 'none';
     expandForm();
     stopTips();
   });
