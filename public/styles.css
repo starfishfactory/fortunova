@@ -403,6 +403,60 @@
   animation: fadeInUp 0.4s ease-out;
 }
 
+/* --- Sub Fortune Grid --- */
+
+.sub-fortune-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* --- Lucky Card --- */
+
+.lucky-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+}
+
+/* --- Proverb Card --- */
+
+.proverb-card {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(212, 168, 83, 0.08), rgba(212, 168, 83, 0.03));
+  border: 1px solid rgba(212, 168, 83, 0.2);
+}
+
+/* --- Gold Outline Button --- */
+
+.btn-gold-outline {
+  background: transparent;
+  color: var(--gold-400);
+  border: 1px solid var(--gold-500);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-gold-outline:hover {
+  background: rgba(212, 168, 83, 0.1);
+  box-shadow: 0 0 15px rgba(212, 168, 83, 0.2);
+  transform: translateY(-1px);
+}
+
+/* --- Small Orb --- */
+
+.orb-glow--small {
+  width: 36px;
+  height: 36px;
+}
+
 /* --- Accessibility: Reduced Motion --- */
 
 @media (prefers-reduced-motion: reduce) {

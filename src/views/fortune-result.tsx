@@ -1,3 +1,5 @@
+import type { DetailedFortuneResult } from '@/fortune/types.js';
+
 interface FortuneResultProps {
   fortune: {
     score: number;
@@ -6,12 +8,41 @@ interface FortuneResultProps {
     advice: string;
     luckyColor?: string;
     luckyNumber?: number;
+    tier?: 'basic' | 'detailed';
   };
   sajuSummary: {
     fourPillars: string;
   };
   cached: boolean;
   remainingFreeCount: number;
+  formData?: Record<string, string>;
+}
+
+function ScoreBar({ score, label }: { score: number; label: string }) {
+  return (
+    <div class="mb-2">
+      <div class="flex justify-between text-xs mb-1">
+        <span class="text-gray-300">{label}</span>
+        <span class="text-gold-400">{score}점</span>
+      </div>
+      <div class="w-full h-2 rounded-full" style="background: rgba(255,255,255,0.1);">
+        <div
+          class="h-2 rounded-full"
+          style={`width: ${score}%; background: linear-gradient(90deg, var(--gold-600), var(--gold-400));`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function RatingStars({ rating }: { rating: number }) {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    stars.push(
+      <span class={i <= rating ? 'text-gold-400' : 'text-gray-600'}>★</span>,
+    );
+  }
+  return <span class="text-sm">{stars}</span>;
 }
 
 export function FortuneResultPartial({
@@ -19,6 +50,7 @@ export function FortuneResultPartial({
   sajuSummary,
   cached,
   remainingFreeCount,
+  formData,
 }: FortuneResultProps) {
   return (
     <div class="glass-card p-6 mt-4 fortune-reveal">
@@ -40,11 +72,144 @@ export function FortuneResultPartial({
         {cached && <p>캐시된 결과</p>}
         <p>오늘 남은 무료 횟수: {remainingFreeCount}회</p>
       </div>
+
+      {/* 더 자세히 보기 버튼 (basic tier일 때만) */}
+      {fortune.tier !== 'detailed' && formData && (
+        <div class="mt-4 text-center">
+          <form
+            hx-post="/partials/fortune-detail"
+            hx-target="#detail-result"
+            hx-indicator="#detail-loading"
+          >
+            {Object.entries(formData).map(([key, value]) => (
+              <input type="hidden" name={key} value={value} />
+            ))}
+            <button type="submit" class="btn-gold-outline px-6 py-2 rounded-lg text-sm font-medium">
+              🔮 더 자세히 보기
+            </button>
+          </form>
+          <div id="detail-loading" class="htmx-indicator mt-2">
+            <div class="loading-container text-center py-4">
+              <div class="orb-glow orb-glow--small mx-auto mb-2"></div>
+              <p class="text-gold-400 text-sm animate-pulse">상세 분석 중...</p>
+            </div>
+          </div>
+          <div id="detail-result"></div>
+        </div>
+      )}
+
       <div class="mt-4 text-center">
         <button id="reopen-form" class="text-sm text-gold-400 hover:text-gold-300 underline cursor-pointer">
           다시 입력하기
         </button>
       </div>
+    </div>
+  );
+}
+
+export function DetailedFortuneResultPartial({
+  fortune,
+}: {
+  fortune: DetailedFortuneResult;
+}) {
+  const SUB_LABELS: Record<string, string> = {
+    wealth: '💰 재물운',
+    health: '💪 건강운',
+    love: '💕 연애운',
+    career: '💼 직장운',
+  };
+
+  return (
+    <div class="glass-card p-6 mt-4 fortune-reveal">
+      <h3 class="text-lg font-serif font-bold text-gold-400 mb-4 text-center">상세 운세 분석</h3>
+
+      {/* 세부운 2x2 그리드 */}
+      <div class="sub-fortune-grid">
+        {Object.entries(fortune.subFortunes).map(([key, sub]) => (
+          <div class="glass-card p-4">
+            <h4 class="text-sm font-medium text-gold-300 mb-2">{SUB_LABELS[key] ?? key}</h4>
+            <ScoreBar score={sub.score} label="" />
+            <p class="text-xs text-gray-400 mt-1">{sub.description}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* 오행 해설 */}
+      {fortune.elementExplanation && (
+        <div class="mt-4 p-4 rounded-lg" style="background: rgba(212, 168, 83, 0.06); border: 1px solid rgba(212, 168, 83, 0.15);">
+          <h4 class="text-sm font-medium text-gold-400 mb-2">🌿 오행 해설</h4>
+          <p class="text-sm text-gray-300">{fortune.elementExplanation}</p>
+        </div>
+      )}
+
+      {/* 행운 정보 카드 */}
+      {fortune.lucky && (
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <div class="lucky-card">
+            <span class="text-xs text-gray-500">행운의 색</span>
+            <span class="text-sm text-gold-300">{fortune.lucky.color}</span>
+          </div>
+          <div class="lucky-card">
+            <span class="text-xs text-gray-500">행운의 숫자</span>
+            <span class="text-sm text-gold-300">{fortune.lucky.number}</span>
+          </div>
+          <div class="lucky-card">
+            <span class="text-xs text-gray-500">행운의 방위</span>
+            <span class="text-sm text-gold-300">{fortune.lucky.direction}</span>
+          </div>
+          <div class="lucky-card">
+            <span class="text-xs text-gray-500">행운의 시간</span>
+            <span class="text-sm text-gold-300">{fortune.lucky.timeSlot}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 주의사항 */}
+      {fortune.cautions && (
+        <div class="mt-4 p-4 rounded-lg" style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.15);">
+          <h4 class="text-sm font-medium text-red-400 mb-2">⚠️ 주의사항</h4>
+          <p class="text-sm text-gray-300">{fortune.cautions}</p>
+        </div>
+      )}
+
+      {/* 월간 운세 흐름 */}
+      {fortune.monthlyTrend && fortune.monthlyTrend.length > 0 && (
+        <div class="mt-4">
+          <h4 class="text-sm font-medium text-gold-400 mb-2">📅 3개월 운세 흐름</h4>
+          <div class="space-y-2">
+            {fortune.monthlyTrend.map((item) => (
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background: rgba(255,255,255,0.03);">
+                <span class="text-xs text-gray-500 w-16 shrink-0">{item.month}</span>
+                <span class="text-sm text-gray-300 flex-1">{item.trend}</span>
+                <RatingStars rating={item.rating} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 궁합 팁 */}
+      {fortune.compatibilityTip && (
+        <div class="mt-4 p-4 rounded-lg" style="background: rgba(212, 168, 83, 0.06); border: 1px solid rgba(212, 168, 83, 0.15);">
+          <h4 class="text-sm font-medium text-gold-400 mb-2">💑 궁합/인간관계 팁</h4>
+          <p class="text-sm text-gray-300">{fortune.compatibilityTip}</p>
+        </div>
+      )}
+
+      {/* 대운 해석 */}
+      {fortune.majorFateInterpretation && (
+        <div class="mt-4 p-4 rounded-lg" style="background: rgba(212, 168, 83, 0.06); border: 1px solid rgba(212, 168, 83, 0.15);">
+          <h4 class="text-sm font-medium text-gold-400 mb-2">🌟 대운 해석</h4>
+          <p class="text-sm text-gray-300">{fortune.majorFateInterpretation}</p>
+        </div>
+      )}
+
+      {/* 격언 카드 */}
+      {fortune.proverb && (
+        <div class="proverb-card mt-4">
+          <p class="text-sm text-gold-300 italic text-center">"{fortune.proverb}"</p>
+        </div>
+      )}
     </div>
   );
 }
