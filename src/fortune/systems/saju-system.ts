@@ -90,14 +90,21 @@ export const sajuSystem: FortuneSystem = {
       `## 요청`,
       `위 사주를 기반으로 "${CATEGORY_LABELS[category]}"를 분석해주세요.`,
       ``,
-      `## 응답 형식 (JSON)`,
+      `## 응답 형식`,
+      `순수 JSON만 반환하세요. 마크다운 코드블록이나 설명 없이 JSON 객체만 출력하세요.`,
       `{ "summary": "한줄 요약", "detail": "상세 설명", "score": 0-100, "advice": "조언", "luckyColor": "행운색", "luckyNumber": 행운숫자 }`,
     ].join('\n');
   },
 
   parseResult(llmResponse: string): FortuneResult {
     try {
-      const parsed = JSON.parse(llmResponse);
+      // LLM이 ```json ... ``` 코드 블록으로 감싸는 경우 처리
+      let jsonStr = llmResponse.trim();
+      const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        jsonStr = codeBlockMatch[1].trim();
+      }
+      const parsed = JSON.parse(jsonStr);
       return {
         summary: parsed.summary ?? '분석 결과를 확인해주세요.',
         detail: parsed.detail ?? '',

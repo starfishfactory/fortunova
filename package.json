@@ -5,7 +5,7 @@
   "description": "AI 사주/명리 운세 시스템",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -43,6 +43,7 @@
     "drizzle-kit": "^0.31.9",
     "eslint": "^9.39.2",
     "tsx": "^4.21.0",
+    "tsc-alias": "^1.8.10",
     "vitest": "^4.0.18"
   }
 }

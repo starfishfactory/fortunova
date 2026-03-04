@@ -8,6 +8,11 @@ import fortunePartials from './routes/partials/fortune.js';
 import authPartials from './routes/partials/auth.js';
 import authApi from './routes/api/auth.js';
 import fortuneApi from './routes/api/fortune.js';
+import { fortuneRegistry } from '@/fortune/registry.js';
+import { sajuSystem } from '@/fortune/systems/saju-system.js';
+
+// 운세 시스템 등록
+fortuneRegistry.register(sajuSystem);
 
 const app = new Hono();
 

@@ -1,7 +1,7 @@
 services:
   fortunova:
     environment:
-      - CLAUDE_MODE=local
+      - CLAUDE_MODE=docker
     volumes:
       - fortunova-data:/app/data
 

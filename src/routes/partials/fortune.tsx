@@ -57,6 +57,7 @@ fortunePartials.post('/fortune-result', async (c) => {
       />,
     );
   } catch (e) {
+    console.error('[fortune-result] Error:', (e as Error).message, (e as Error).stack);
     const msg = (e as Error).message;
     if (msg === 'DAILY_LIMIT_EXCEEDED' || msg.includes('일일')) {
       return c.html(<LimitExceededPartial />);

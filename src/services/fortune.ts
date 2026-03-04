@@ -76,10 +76,15 @@ export async function getFortune(
   const llmResponse = await callClaude(prompt);
   const fortune = system.parseResult(llmResponse);
 
+  const data = analysis.data as Record<string, unknown>;
+  const fp = data.fourPillars as Record<string, Record<string, string>> | undefined;
+  const fourPillarsStr = fp
+    ? `${fp.year?.stem ?? ''}${fp.year?.branch ?? ''} ${fp.month?.stem ?? ''}${fp.month?.branch ?? ''} ${fp.day?.stem ?? ''}${fp.day?.branch ?? ''} ${fp.hour?.stem ?? ''}${fp.hour?.branch ?? ''}`
+    : '';
   const sajuSummary = {
-    fourPillars: (analysis.data.fourPillars as string) ?? '',
-    dayMasterStrength: (analysis.data.dayMasterStrength as string) ?? '',
-    todayElement: (analysis.data.todayElement as string) ?? '',
+    fourPillars: fourPillarsStr.trim(),
+    dayMasterStrength: (data.dayMasterStrength as string) ?? '',
+    todayElement: (data.usefulGod as string) ?? '',
   };
 
   // 4. 캐시 저장
