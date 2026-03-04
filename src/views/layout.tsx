@@ -191,6 +191,65 @@ export function Layout({ children, title }: { children: any; title?: string }) {
 })();
 `,
         }} />
+        {/* localStorage result caching */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+(function() {
+  var today = new Date().toISOString().slice(0, 10);
+
+  // 전날 캐시 자동 정리
+  try {
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      var k = localStorage.key(i);
+      if (k && k.startsWith('fortunova_result_') && !k.includes(today)) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch(e) {}
+
+  function buildCacheKey(formEl, endpoint) {
+    var fd = new FormData(formEl);
+    var birth = (fd.get('year')||'') + '-' + (fd.get('month')||'') + '-' + (fd.get('day')||'') + '-' + (fd.get('gender')||'');
+    var cat = fd.get('category') || 'daily';
+    var suffix = endpoint.includes('fortune-detail') ? 'detailed' : 'basic';
+    return 'fortunova_result_' + today + '_' + cat + '_' + birth + '_' + suffix;
+  }
+
+  document.addEventListener('htmx:confirm', function(evt) {
+    var el = evt.detail.elt;
+    if (!el || el.tagName !== 'FORM') return;
+    var action = el.getAttribute('hx-post') || '';
+    if (!action.includes('fortune')) return;
+    var key = buildCacheKey(el, action);
+    var cached = null;
+    try { cached = localStorage.getItem(key); } catch(e) {}
+    if (cached) {
+      evt.preventDefault();
+      var targetId = el.getAttribute('hx-target') || '#result';
+      var target = document.querySelector(targetId);
+      if (target) {
+        target.innerHTML = cached;
+        var sec = document.getElementById('form-section');
+        if (sec) sec.classList.add('collapsed');
+      }
+    }
+  });
+
+  document.addEventListener('htmx:afterSwap', function(evt) {
+    var el = evt.detail.elt;
+    if (!el || el.tagName !== 'FORM') return;
+    var action = el.getAttribute('hx-post') || '';
+    if (!action.includes('fortune')) return;
+    var key = buildCacheKey(el, action);
+    var targetId = el.getAttribute('hx-target') || '#result';
+    var target = document.querySelector(targetId);
+    if (target) {
+      try { localStorage.setItem(key, target.innerHTML); } catch(e) {}
+    }
+  });
+})();
+`,
+        }} />
         {/* Service Worker */}
         <script dangerouslySetInnerHTML={{
           __html: `if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js').catch(() => {}); }`,
