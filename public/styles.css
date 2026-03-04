@@ -363,6 +363,46 @@
   background: var(--gold-600);
 }
 
+/* --- Form Collapse --- */
+
+.form-section {
+  max-height: 2000px;
+  overflow: hidden;
+  transition: max-height 0.6s ease, opacity 0.4s ease;
+  opacity: 1;
+}
+
+.form-section.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- Loading Orb --- */
+
+@keyframes orb-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(212, 168, 83, 0.4), 0 0 60px rgba(212, 168, 83, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(212, 168, 83, 0.6), 0 0 80px rgba(212, 168, 83, 0.3), 0 0 120px rgba(212, 168, 83, 0.1);
+    transform: scale(1.1);
+  }
+}
+
+.orb-glow {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, var(--gold-400), var(--gold-600), transparent);
+  animation: orb-glow 2s ease-in-out infinite;
+}
+
+.loading-container {
+  animation: fadeInUp 0.4s ease-out;
+}
+
 /* --- Accessibility: Reduced Motion --- */
 
 @media (prefers-reduced-motion: reduce) {

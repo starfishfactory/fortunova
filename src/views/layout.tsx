@@ -84,6 +84,113 @@ export function Layout({ children, title }: { children: any; title?: string }) {
             }
           })();`,
         }} />
+        {/* Form collapse + loading tips */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+(function() {
+  var TIPS = [
+    '사주(四柱)는 태어난 연·월·일·시의 네 기둥을 의미합니다',
+    '천간(天干)은 갑·을·병·정·무·기·경·신·임·계 10가지입니다',
+    '지지(地支)는 자·축·인·묘·진·사·오·미·신·유·술·해 12가지입니다',
+    '오행(五行)은 목·화·토·금·수, 만물의 근본 에너지입니다',
+    '일간(日干)은 사주에서 "나"를 대표하는 핵심 요소입니다',
+    '용신(用神)은 사주의 균형을 맞추는 가장 필요한 오행입니다',
+    '대운(大運)은 10년 단위로 바뀌는 인생의 큰 흐름입니다',
+    '십신(十神)은 일간과 다른 글자의 관계를 나타냅니다',
+    '상생(相生): 목→화→토→금→수→목 순으로 도움을 줍니다',
+    '상극(相克): 목→토→수→화→금→목 순으로 억제합니다'
+  ];
+  var tipIdx = Math.floor(Math.random() * TIPS.length);
+  var tipTimer = null;
+
+  function startTips() {
+    var el = document.getElementById('loading-tip');
+    if (!el) return;
+    el.textContent = TIPS[tipIdx];
+    tipTimer = setInterval(function() {
+      el.style.opacity = '0';
+      setTimeout(function() {
+        tipIdx = (tipIdx + 1) % TIPS.length;
+        el.textContent = TIPS[tipIdx];
+        el.style.opacity = '1';
+      }, 500);
+    }, 3500);
+  }
+  function stopTips() {
+    if (tipTimer) { clearInterval(tipTimer); tipTimer = null; }
+  }
+
+  document.addEventListener('htmx:beforeRequest', function(evt) {
+    var form = evt.detail.elt;
+    if (!form || form.tagName !== 'FORM') return;
+    var sec = document.getElementById('form-section');
+    if (sec) sec.classList.add('collapsed');
+    startTips();
+  });
+  document.addEventListener('htmx:afterRequest', function(evt) {
+    stopTips();
+  });
+  document.addEventListener('htmx:responseError', function() {
+    var sec = document.getElementById('form-section');
+    if (sec) sec.classList.remove('collapsed');
+    stopTips();
+  });
+  // 결과 영역 클릭으로 폼 펼치기
+  document.addEventListener('click', function(evt) {
+    if (evt.target && evt.target.id === 'reopen-form') {
+      var sec = document.getElementById('form-section');
+      if (sec) sec.classList.remove('collapsed');
+    }
+  });
+})();
+`,
+        }} />
+        {/* Cookie form save/restore */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+(function() {
+  var COOKIE_NAME = 'fortunova_input';
+  function saveCookie(data) {
+    document.cookie = COOKIE_NAME + '=' + encodeURIComponent(JSON.stringify(data)) + ';max-age=315360000;path=/';
+  }
+  function readCookie() {
+    var m = document.cookie.match('(?:^|; )' + COOKIE_NAME + '=([^;]*)');
+    if (!m) return null;
+    try { return JSON.parse(decodeURIComponent(m[1])); } catch(e) { return null; }
+  }
+  document.addEventListener('htmx:configRequest', function(evt) {
+    var form = evt.detail.elt;
+    if (!form || form.tagName !== 'FORM') return;
+    var fd = {};
+    form.querySelectorAll('select,input').forEach(function(el) {
+      if (!el.name) return;
+      if (el.type === 'radio') { if (el.checked) fd[el.name] = el.value; }
+      else if (el.type === 'checkbox') { fd[el.name] = el.checked ? el.value : ''; }
+      else { fd[el.name] = el.value; }
+    });
+    saveCookie(fd);
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    var saved = readCookie();
+    if (!saved) return;
+    Object.keys(saved).forEach(function(name) {
+      var els = document.querySelectorAll('[name="' + name + '"]');
+      els.forEach(function(el) {
+        if (el.type === 'radio') { el.checked = (el.value === saved[name]); }
+        else if (el.type === 'checkbox') { el.checked = (saved[name] === el.value); }
+        else { el.value = saved[name]; }
+      });
+    });
+    // 음력 선택 시 윤달 필드 표시
+    var calType = saved['calendarType'];
+    if (calType === 'lunar') {
+      var lf = document.getElementById('leapMonthField');
+      if (lf) lf.style.display = 'block';
+    }
+  });
+})();
+`,
+        }} />
         {/* Service Worker */}
         <script dangerouslySetInnerHTML={{
           __html: `if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js').catch(() => {}); }`,

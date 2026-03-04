@@ -13,6 +13,7 @@ export function HomePage() {
         <p class="text-sm text-gray-400">생년월일을 입력하고 오늘의 운세를 확인하세요</p>
       </div>
 
+      <div id="form-section" class="form-section">
       <form
         hx-post="/partials/fortune-result"
         hx-target="#result"
@@ -121,10 +122,15 @@ export function HomePage() {
           운세 보기
         </button>
       </form>
+      </div>
 
       {/* 로딩 인디케이터 */}
-      <div id="loading" class="htmx-indicator text-center py-6">
-        <p class="text-gold-400 animate-pulse font-medium">운세를 분석하고 있습니다...</p>
+      <div id="loading" class="htmx-indicator">
+        <div class="loading-container text-center py-8">
+          <div class="orb-glow mx-auto mb-4"></div>
+          <p class="text-gold-400 font-medium mb-2">운세를 분석하고 있습니다...</p>
+          <p id="loading-tip" class="text-sm text-gray-400 transition-opacity duration-500"></p>
+        </div>
       </div>
 
       {/* 결과 영역 */}

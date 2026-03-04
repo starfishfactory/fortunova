@@ -40,6 +40,11 @@ export function FortuneResultPartial({
         {cached && <p>캐시된 결과</p>}
         <p>오늘 남은 무료 횟수: {remainingFreeCount}회</p>
       </div>
+      <div class="mt-4 text-center">
+        <button id="reopen-form" class="text-sm text-gold-400 hover:text-gold-300 underline cursor-pointer">
+          다시 입력하기
+        </button>
+      </div>
     </div>
   );
 }
