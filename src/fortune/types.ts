@@ -32,6 +32,8 @@ export interface FortuneResult {
   luckyColor?: string;
   luckyNumber?: number;
   tier?: 'basic' | 'detailed';
+  elementInsight?: string;
+  dayTip?: string;
 }
 
 /**

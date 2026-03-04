@@ -13,6 +13,19 @@ export function HomePage() {
         <p class="text-sm text-gray-400">생년월일을 입력하고 오늘의 운세를 확인하세요</p>
       </div>
 
+      {/* 접힌 상태에서 보이는 입력 요약 */}
+      <div id="form-summary" class="form-summary" style="display:none">
+        <div class="glass-card p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-gold-400">🔮</span>
+            <span id="summary-text" class="text-gray-300"></span>
+          </div>
+          <button id="reopen-form" class="text-xs text-gold-400 hover:text-gold-300 underline cursor-pointer shrink-0">
+            다시 입력
+          </button>
+        </div>
+      </div>
+
       <div id="form-section" class="form-section">
       <form
         hx-post="/partials/fortune-result"

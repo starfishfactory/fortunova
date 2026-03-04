@@ -368,7 +368,7 @@
 .form-section {
   max-height: 2000px;
   overflow: hidden;
-  transition: max-height 0.6s ease, opacity 0.4s ease;
+  transition: max-height 0.5s ease-out, opacity 0.3s ease;
   opacity: 1;
 }
 
@@ -376,6 +376,15 @@
   max-height: 0;
   opacity: 0;
   pointer-events: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Form Summary (shown when collapsed) --- */
+
+.form-summary {
+  animation: fadeInUp 0.4s ease-out;
+  margin-bottom: 0.5rem;
 }
 
 /* --- Loading Orb --- */
@@ -455,6 +464,77 @@
 .orb-glow--small {
   width: 36px;
   height: 36px;
+}
+
+/* --- Detail Promo --- */
+
+.detail-promo {
+  background: linear-gradient(135deg, rgba(212, 168, 83, 0.06), rgba(212, 168, 83, 0.02));
+  border: 1px dashed rgba(212, 168, 83, 0.25);
+  text-align: center;
+}
+
+.detail-btn {
+  position: relative;
+}
+
+.detail-btn-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  color: var(--navy-900);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* --- Detailed Result (PREMIUM) --- */
+
+.detailed-result {
+  margin-top: 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--glass-light);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 168, 83, 0.25);
+  box-shadow: 0 0 30px rgba(212, 168, 83, 0.08), var(--shadow-card);
+  overflow: hidden;
+}
+
+.detailed-header {
+  background: linear-gradient(135deg, rgba(212, 168, 83, 0.12), rgba(212, 168, 83, 0.04));
+  border-bottom: 1px solid rgba(212, 168, 83, 0.15);
+}
+
+.detailed-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+  color: var(--navy-900);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* --- Section Cards (Detailed) --- */
+
+.section-card {
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+}
+
+.section-card--gold {
+  background: rgba(212, 168, 83, 0.06);
+  border: 1px solid rgba(212, 168, 83, 0.15);
+}
+
+.section-card--warn {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.15);
 }
 
 /* --- Accessibility: Reduced Motion --- */

@@ -113,33 +113,61 @@ export function Layout({ children, title }: { children: any; title?: string }) {
         tipIdx = (tipIdx + 1) % TIPS.length;
         el.textContent = TIPS[tipIdx];
         el.style.opacity = '1';
-      }, 500);
-    }, 3500);
+      }, 750);
+    }, 5250);
   }
   function stopTips() {
     if (tipTimer) { clearInterval(tipTimer); tipTimer = null; }
   }
 
+  var CATEGORY_NAMES = { daily: '오늘의 운세', love: '연애운', career: '직장운', health: '건강운', wealth: '재물운' };
+
+  window.collapseForm = collapseForm;
+  window.expandForm = expandForm;
+  function collapseForm(form) {
+    var sec = document.getElementById('form-section');
+    var summary = document.getElementById('form-summary');
+    if (sec) sec.classList.add('collapsed');
+    if (summary && form) {
+      var fd = new FormData(form);
+      var y = fd.get('year') || '?';
+      var m = fd.get('month') || '?';
+      var d = fd.get('day') || '?';
+      var g = fd.get('gender') === 'F' ? '여' : '남';
+      var cat = CATEGORY_NAMES[fd.get('category')] || '운세';
+      var txt = document.getElementById('summary-text');
+      if (txt) txt.textContent = y + '.' + m + '.' + d + ' (' + g + ') · ' + cat;
+      summary.style.display = 'block';
+    }
+  }
+
+  function expandForm() {
+    var sec = document.getElementById('form-section');
+    var summary = document.getElementById('form-summary');
+    if (sec) sec.classList.remove('collapsed');
+    if (summary) summary.style.display = 'none';
+  }
+
   document.addEventListener('htmx:beforeRequest', function(evt) {
     var form = evt.detail.elt;
     if (!form || form.tagName !== 'FORM') return;
-    var sec = document.getElementById('form-section');
-    if (sec) sec.classList.add('collapsed');
+    // detail 요청은 폼 접기 안함
+    var action = form.getAttribute('hx-post') || '';
+    if (action.includes('fortune-detail')) return;
+    collapseForm(form);
     startTips();
   });
   document.addEventListener('htmx:afterRequest', function(evt) {
     stopTips();
   });
   document.addEventListener('htmx:responseError', function() {
-    var sec = document.getElementById('form-section');
-    if (sec) sec.classList.remove('collapsed');
+    expandForm();
     stopTips();
   });
   // 결과 영역 클릭으로 폼 펼치기
   document.addEventListener('click', function(evt) {
     if (evt.target && evt.target.id === 'reopen-form') {
-      var sec = document.getElementById('form-section');
-      if (sec) sec.classList.remove('collapsed');
+      expandForm();
     }
   });
 })();
@@ -229,8 +257,10 @@ export function Layout({ children, title }: { children: any; title?: string }) {
       var target = document.querySelector(targetId);
       if (target) {
         target.innerHTML = cached;
-        var sec = document.getElementById('form-section');
-        if (sec) sec.classList.add('collapsed');
+        // 메인 폼인 경우 요약 바와 함께 접기
+        if (!action.includes('fortune-detail') && window.collapseForm) {
+          window.collapseForm(el);
+        }
       }
     }
   });

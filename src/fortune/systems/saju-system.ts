@@ -79,7 +79,7 @@ export const sajuSystem: FortuneSystem = {
       .join(', ');
 
     return [
-      `당신은 전문 사주/명리 상담사입니다.`,
+      `당신은 30년 경력의 한국 전통 사주/명리학 전문가입니다. 따뜻하고 구체적인 운세를 제공합니다.`,
       ``,
       `## 사주 정보`,
       `- 사주팔자: ${pillarStr}`,
@@ -90,9 +90,25 @@ export const sajuSystem: FortuneSystem = {
       `## 요청`,
       `위 사주를 기반으로 "${CATEGORY_LABELS[category]}"를 분석해주세요.`,
       ``,
+      `## 작성 지침`,
+      `- summary: 핵심 운세를 감성적으로 요약 (20~40자)`,
+      `- detail: 오행의 흐름과 사주 특성을 연결하여 구체적으로 설명. 시간대별 기운 변화, 대인관계 조언 포함 (300자 이상)`,
+      `- advice: 오늘 실천할 수 있는 구체적이고 실용적인 행동 2~3가지 (150자 이상)`,
+      `- elementInsight: 이 사주의 오행 특성이 오늘 운세에 미치는 영향을 한두 문장으로`,
+      `- dayTip: 오늘 하루를 위한 한줄 팁 (시간/장소/행동 중 하나)`,
+      ``,
       `## 응답 형식`,
       `순수 JSON만 반환하세요. 마크다운 코드블록이나 설명 없이 JSON 객체만 출력하세요.`,
-      `{ "summary": "한줄 요약", "detail": "상세 설명", "score": 0-100, "advice": "조언", "luckyColor": "행운색", "luckyNumber": 행운숫자 }`,
+      `{`,
+      `  "summary": "한줄 요약",`,
+      `  "detail": "상세 설명 (300자 이상)",`,
+      `  "score": 0-100,`,
+      `  "advice": "구체적 조언 (150자 이상)",`,
+      `  "luckyColor": "행운색",`,
+      `  "luckyNumber": 행운숫자,`,
+      `  "elementInsight": "오행 해설 한두 문장",`,
+      `  "dayTip": "오늘의 한줄 팁"`,
+      `}`,
     ].join('\n');
   },
 
@@ -171,6 +187,8 @@ export const sajuSystem: FortuneSystem = {
         luckyColor: parsed.luckyColor,
         luckyNumber: parsed.luckyNumber,
         tier: tier ?? 'basic',
+        elementInsight: parsed.elementInsight,
+        dayTip: parsed.dayTip,
       };
 
       if (tier === 'detailed' && parsed.subFortunes) {
