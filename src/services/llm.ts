@@ -43,35 +43,39 @@ export function _resetSemaphore(): void {
   claudeSemaphore.reset();
 }
 
-function buildCommand(prompt: string): { cmd: string; args: string[] } {
+export type ClaudeModel = 'haiku' | 'sonnet';
+
+function buildCommand(prompt: string, model?: ClaudeModel): { cmd: string; args: string[] } {
   if (config.claudeMode === 'docker') {
-    return {
-      cmd: 'docker',
-      args: ['exec', config.claudeContainer, 'claude', '-p', prompt, '--output-format', 'text'],
-    };
+    const args = ['exec', config.claudeContainer, 'claude', '-p', prompt, '--output-format', 'text'];
+    if (model) args.push('--model', model);
+    return { cmd: 'docker', args };
   }
-  return { cmd: 'claude', args: ['--print', '-p', prompt] };
+  const args = ['--print', '-p', prompt];
+  if (model) args.push('--model', model);
+  return { cmd: 'claude', args };
 }
 
 /**
  * Claude CLI headless 모드로 프롬프트를 전송하고 응답을 받는다.
  */
-export async function callClaude(prompt: string): Promise<string> {
+export async function callClaude(prompt: string, model?: ClaudeModel): Promise<string> {
   await claudeSemaphore.acquire();
   try {
-    return await executeClaudeCli(prompt);
+    return await executeClaudeCli(prompt, model);
   } finally {
     claudeSemaphore.release();
   }
 }
 
-function executeClaudeCli(prompt: string): Promise<string> {
-  const { cmd, args } = buildCommand(prompt);
+function executeClaudeCli(prompt: string, model?: ClaudeModel): Promise<string> {
+  const { cmd, args } = buildCommand(prompt, model);
+  const timeout = model === 'sonnet' ? Math.max(config.claudeTimeout, 90000) : config.claudeTimeout;
   return new Promise((resolve, reject) => {
     execFile(
       cmd,
       args,
-      { timeout: config.claudeTimeout },
+      { timeout },
       (error, stdout, _stderr) => {
         if (error) {
           if ((error as NodeJS.ErrnoException & { killed?: boolean }).killed) {
