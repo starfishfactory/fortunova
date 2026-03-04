@@ -11,8 +11,8 @@ authPartials.post('/auth/login', async (c) => {
 
   if (!email || !password) {
     return c.html(
-      <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-        <p class="text-red-700 text-sm">이메일과 비밀번호를 입력해주세요</p>
+      <div class="auth-error p-3 mt-2">
+        <p class="text-sm">이메일과 비밀번호를 입력해주세요</p>
       </div>,
     );
   }
@@ -40,8 +40,8 @@ authPartials.post('/auth/login', async (c) => {
       );
     }
     return c.html(
-      <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-        <p class="text-red-700 text-sm">로그인 처리 중 오류가 발생했습니다</p>
+      <div class="auth-error p-3 mt-2">
+        <p class="text-sm">로그인 처리 중 오류가 발생했습니다</p>
       </div>,
     );
   }
@@ -60,16 +60,16 @@ authPartials.post('/auth/register', async (c) => {
 
   if (!email || !password || !gender || !birthYear || !birthMonth || !birthDay) {
     return c.html(
-      <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-        <p class="text-red-700 text-sm">모든 필수 항목을 입력해주세요</p>
+      <div class="auth-error p-3 mt-2">
+        <p class="text-sm">모든 필수 항목을 입력해주세요</p>
       </div>,
     );
   }
 
   if (password.length < 8) {
     return c.html(
-      <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-        <p class="text-red-700 text-sm">비밀번호는 8자 이상이어야 합니다</p>
+      <div class="auth-error p-3 mt-2">
+        <p class="text-sm">비밀번호는 8자 이상이어야 합니다</p>
       </div>,
     );
   }
@@ -106,8 +106,8 @@ authPartials.post('/auth/register', async (c) => {
       );
     }
     return c.html(
-      <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-2">
-        <p class="text-red-700 text-sm">회원가입 처리 중 오류가 발생했습니다</p>
+      <div class="auth-error p-3 mt-2">
+        <p class="text-sm">회원가입 처리 중 오류가 발생했습니다</p>
       </div>,
     );
   }

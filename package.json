@@ -17,7 +17,12 @@
     "type": "git",
     "url": "git+https://github.com/starfishfactory/fortunova.git"
   },
-  "keywords": ["saju", "fortune", "ai", "korean-astrology"],
+  "keywords": [
+    "saju",
+    "fortune",
+    "ai",
+    "korean-astrology"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {

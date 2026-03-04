@@ -6,19 +6,24 @@ export function HomePage() {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   return (
-    <div class="mt-4">
-      <h2 class="text-lg font-bold text-gray-800 mb-4">사주 운세 보기</h2>
+    <div class="mt-6">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-serif font-bold text-gold-400 mb-2">사주 운세 보기</h2>
+        <hr class="divider-gold" />
+        <p class="text-sm text-gray-400">생년월일을 입력하고 오늘의 운세를 확인하세요</p>
+      </div>
+
       <form
         hx-post="/partials/fortune-result"
         hx-target="#result"
         hx-indicator="#loading"
-        class="space-y-4"
+        class="glass-card p-6 space-y-5"
       >
         {/* 생년월일 */}
         <fieldset class="space-y-2">
-          <legend class="text-sm font-medium text-gray-700">생년월일</legend>
+          <legend class="text-sm font-medium text-gray-300">생년월일</legend>
           <div class="grid grid-cols-3 gap-2">
-            <select name="year" class="border rounded-lg p-2 text-sm" required>
+            <select name="year" class="input-dark rounded-lg p-2 text-sm" required>
               <option value="">년</option>
               {years.map((y) => (
                 <option value={String(y)} selected={y === currentYear - 30}>
@@ -26,13 +31,13 @@ export function HomePage() {
                 </option>
               ))}
             </select>
-            <select name="month" class="border rounded-lg p-2 text-sm" required>
+            <select name="month" class="input-dark rounded-lg p-2 text-sm" required>
               <option value="">월</option>
               {months.map((m) => (
                 <option value={String(m)}>{m}월</option>
               ))}
             </select>
-            <select name="day" class="border rounded-lg p-2 text-sm" required>
+            <select name="day" class="input-dark rounded-lg p-2 text-sm" required>
               <option value="">일</option>
               {days.map((d) => (
                 <option value={String(d)}>{d}일</option>
@@ -43,8 +48,8 @@ export function HomePage() {
 
         {/* 출생 시간 */}
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">출생 시간</label>
-          <select name="hour" class="border rounded-lg p-2 text-sm w-full">
+          <label class="text-sm font-medium text-gray-300 block mb-1">출생 시간</label>
+          <select name="hour" class="input-dark rounded-lg p-2 text-sm w-full">
             <option value="">모름</option>
             {hours.map((h) => (
               <option value={String(h)}>{h}시</option>
@@ -54,20 +59,21 @@ export function HomePage() {
 
         {/* 양력/음력 */}
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">달력 유형</label>
+          <label class="text-sm font-medium text-gray-300 block mb-1">달력 유형</label>
           <div class="flex gap-4">
             <label class="flex items-center gap-1">
-              <input type="radio" name="calendarType" value="solar" checked />
-              <span class="text-sm">양력</span>
+              <input type="radio" name="calendarType" value="solar" checked class="radio-dark" />
+              <span class="text-sm text-gray-300">양력</span>
             </label>
             <label class="flex items-center gap-1">
               <input
                 type="radio"
                 name="calendarType"
                 value="lunar"
+                class="radio-dark"
                 onclick="document.getElementById('leapMonthField').style.display='block'"
               />
-              <span class="text-sm">음력</span>
+              <span class="text-sm text-gray-300">음력</span>
             </label>
           </div>
         </div>
@@ -75,30 +81,30 @@ export function HomePage() {
         {/* 윤달 여부 */}
         <div id="leapMonthField" style="display:none">
           <label class="flex items-center gap-2">
-            <input type="checkbox" name="isLeapMonth" value="true" />
-            <span class="text-sm text-gray-700">윤달</span>
+            <input type="checkbox" name="isLeapMonth" value="true" class="checkbox-dark" />
+            <span class="text-sm text-gray-300">윤달</span>
           </label>
         </div>
 
         {/* 성별 */}
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">성별</label>
+          <label class="text-sm font-medium text-gray-300 block mb-1">성별</label>
           <div class="flex gap-4">
             <label class="flex items-center gap-1">
-              <input type="radio" name="gender" value="M" checked />
-              <span class="text-sm">남성</span>
+              <input type="radio" name="gender" value="M" checked class="radio-dark" />
+              <span class="text-sm text-gray-300">남성</span>
             </label>
             <label class="flex items-center gap-1">
-              <input type="radio" name="gender" value="F" />
-              <span class="text-sm">여성</span>
+              <input type="radio" name="gender" value="F" class="radio-dark" />
+              <span class="text-sm text-gray-300">여성</span>
             </label>
           </div>
         </div>
 
         {/* 운세 카테고리 */}
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">운세 카테고리</label>
-          <select name="category" class="border rounded-lg p-2 text-sm w-full">
+          <label class="text-sm font-medium text-gray-300 block mb-1">운세 카테고리</label>
+          <select name="category" class="input-dark rounded-lg p-2 text-sm w-full">
             <option value="daily">오늘의 운세</option>
             <option value="love">연애운</option>
             <option value="career">직장운</option>
@@ -110,15 +116,15 @@ export function HomePage() {
         {/* 제출 버튼 */}
         <button
           type="submit"
-          class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          class="btn-gold w-full py-3 rounded-lg font-medium text-base"
         >
           운세 보기
         </button>
       </form>
 
       {/* 로딩 인디케이터 */}
-      <div id="loading" class="htmx-indicator text-center py-4 text-indigo-600">
-        운세를 분석하고 있습니다...
+      <div id="loading" class="htmx-indicator text-center py-6">
+        <p class="text-gold-400 animate-pulse font-medium">운세를 분석하고 있습니다...</p>
       </div>
 
       {/* 결과 영역 */}
