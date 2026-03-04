@@ -31,6 +31,54 @@ export interface FortuneResult {
   advice: string;
   luckyColor?: string;
   luckyNumber?: number;
+  tier?: 'basic' | 'detailed';
+}
+
+/**
+ * 세부 운세 항목
+ */
+export interface SubFortune {
+  score: number;
+  description: string;
+}
+
+/**
+ * 행운 정보
+ */
+export interface LuckyInfo {
+  color: string;
+  number: number;
+  direction: string;
+  timeSlot: string;
+}
+
+/**
+ * 월간 운세 트렌드
+ */
+export interface MonthlyTrend {
+  month: string;
+  trend: string;
+  rating: number;
+}
+
+/**
+ * 상세 운세 결과 (2-tier detailed)
+ */
+export interface DetailedFortuneResult extends FortuneResult {
+  tier: 'detailed';
+  subFortunes: {
+    wealth: SubFortune;
+    health: SubFortune;
+    love: SubFortune;
+    career: SubFortune;
+  };
+  elementExplanation: string;
+  lucky: LuckyInfo;
+  cautions: string;
+  monthlyTrend: MonthlyTrend[];
+  compatibilityTip: string;
+  proverb: string;
+  majorFateInterpretation: string;
 }
 
 /**
@@ -48,8 +96,10 @@ export interface FortuneSystem {
   requiredInput: InputField[];
   /** 입력 데이터를 분석하여 시스템 고유 분석 결과 반환 */
   analyze(input: Record<string, unknown>): Promise<SystemAnalysis>;
-  /** 분석 결과를 LLM 프롬프트로 변환 */
+  /** 분석 결과를 LLM 프롬프트로 변환 (basic tier) */
   buildPrompt(analysis: SystemAnalysis, category: FortuneCategory): string;
+  /** 분석 결과를 상세 LLM 프롬프트로 변환 (detailed tier) */
+  buildDetailedPrompt?(analysis: SystemAnalysis, category: FortuneCategory): string;
   /** LLM 응답을 파싱하여 FortuneResult로 변환 */
-  parseResult(llmResponse: string): FortuneResult;
+  parseResult(llmResponse: string, tier?: 'basic' | 'detailed'): FortuneResult | DetailedFortuneResult;
 }
