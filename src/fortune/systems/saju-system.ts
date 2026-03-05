@@ -45,12 +45,12 @@ export const sajuSystem: FortuneSystem = {
 
     return {
       systemId: 'saju',
-      data: analysis as unknown as Record<string, unknown>,
+      data: { ...analysis, birthYear: birthInput.year, gender: birthInput.gender } as unknown as Record<string, unknown>,
     };
   },
 
   buildPrompt(analysis: SystemAnalysis, category: FortuneCategory): string {
-    const data = analysis.data as unknown as SajuAnalysis;
+    const data = analysis.data as unknown as SajuAnalysis & { birthYear?: number; gender?: string };
     const { fourPillars, elementBalance, dayMasterStrength, majorFate } = data;
 
     const pillarStr = [
@@ -65,6 +65,21 @@ export const sajuSystem: FortuneSystem = {
       .join(', ');
 
     const today = new Date().toISOString().slice(0, 10);
+    const currentYear = new Date().getFullYear();
+    const birthYear = data.birthYear ?? currentYear - 30;
+    const koreanAge = currentYear - birthYear + 1;
+    const internationalAge = currentYear - birthYear;
+    const genderLabel = data.gender === 'F' ? '여성' : '남성';
+
+    // 나이대별 생애 단계
+    let lifeStage: string;
+    if (internationalAge < 20) lifeStage = '학업과 진로 탐색기';
+    else if (internationalAge < 28) lifeStage = '사회 초년생, 취업·자기계발 시기';
+    else if (internationalAge < 35) lifeStage = '커리어 성장기, 결혼·연애 적극기';
+    else if (internationalAge < 45) lifeStage = '사회적 안정기, 자녀 양육·승진 시기';
+    else if (internationalAge < 55) lifeStage = '중년 전환기, 건강관리·재테크 중시 시기';
+    else if (internationalAge < 65) lifeStage = '인생 후반 설계기, 은퇴 준비·건강 시기';
+    else lifeStage = '노년기, 건강과 여유로운 삶 시기';
 
     return [
       `다음은 한국 전통 사주/명리 운세 웹 애플리케이션(Fortunova)의 콘텐츠 생성 작업입니다.`,
@@ -77,14 +92,19 @@ export const sajuSystem: FortuneSystem = {
       `- 오행 비율: ${elementStr}`,
       `- 대운 수: ${majorFate.length}개`,
       `- 오늘 날짜: ${today}`,
+      `- 성별: ${genderLabel}`,
+      `- 만 나이: ${internationalAge}세 (한국 나이 ${koreanAge}세)`,
+      `- 생애 단계: ${lifeStage}`,
       ``,
       `## 요청`,
       `위 사주를 기반으로 "${CATEGORY_LABELS[category]}"를 종합적으로 분석해주세요.`,
+      `반드시 이 사람의 나이(${internationalAge}세 ${genderLabel})와 현재 생애 단계(${lifeStage})에 맞는 현실적이고 공감되는 조언을 해주세요.`,
+      `예: 20대면 취업·연애·자기계발, 30대면 결혼·육아·커리어, 40~50대면 건강·재테크·자녀교육, 60대 이상이면 건강·노후·가족관계 등.`,
       ``,
       `## 작성 지침`,
       `- summary: 핵심 운세를 감성적으로 요약 (20~40자)`,
-      `- detail: 오행의 흐름과 사주 특성을 연결하여 구체적으로 설명. 시간대별 기운 변화, 대인관계 조언 포함 (500자 이상)`,
-      `- advice: 오늘 실천할 수 있는 구체적이고 실용적인 행동 3가지 (200자 이상)`,
+      `- detail: 오행의 흐름과 사주 특성을 이 사람의 나이·생애 단계에 연결하여 구체적으로 설명. 시간대별 기운 변화, 대인관계 조언 포함 (500자 이상)`,
+      `- advice: 이 나이대에 맞는 오늘 실천할 수 있는 구체적이고 실용적인 행동 3가지 (200자 이상)`,
       `- elementInsight: 이 사주의 오행 특성이 오늘 운세에 미치는 영향 (100자 이상)`,
       `- dayTip: 오늘 하루를 위한 구체적 한줄 팁`,
       `- subFortunes: 재물·건강·연애·직장 각각 점수와 3~4문장 설명`,
