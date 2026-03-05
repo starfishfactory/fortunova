@@ -1,7 +1,7 @@
 import type { BirthInput } from '@/engine/types/index.js';
 import type { FortuneCategory, FortuneResult } from '@/fortune/types.js';
 import { fortuneRegistry } from '@/fortune/registry.js';
-import { callClaude, type ClaudeModel } from '@/services/llm.js';
+import { callClaude } from '@/services/llm.js';
 import { getDatabase } from '@/db/connection.js';
 import { config } from '@/config.js';
 
@@ -16,17 +16,14 @@ export interface GetFortuneResult {
   remainingFreeCount: number;
 }
 
-export type FortuneTier = 'basic' | 'detailed';
-
 function buildCacheKey(
   input: BirthInput,
   date: string,
   category: FortuneCategory,
   systemId: string,
-  tier: FortuneTier = 'basic',
 ): string {
   const inputKey = `${input.year}-${input.month}-${input.day}-${input.hour ?? 'null'}-${input.isLunar}-${input.gender}`;
-  return `${inputKey}:${date}:${category}:${systemId}:${tier}`;
+  return `${inputKey}:${date}:${category}:${systemId}`;
 }
 
 function getTodayDate(): string {
@@ -42,7 +39,6 @@ export async function getFortune(
   systemId: string,
   identifier: string,
   identifierType: 'user' | 'anonymous',
-  tier: FortuneTier = 'basic',
 ): Promise<GetFortuneResult> {
   // 1. 시스템 조회
   const system = fortuneRegistry.get(systemId);
@@ -52,7 +48,7 @@ export async function getFortune(
 
   const db = getDatabase();
   const date = getTodayDate();
-  const cacheKey = buildCacheKey(input, date, category, systemId, tier);
+  const cacheKey = buildCacheKey(input, date, category, systemId);
 
   // 2. 캐시 조회
   const cached = db.prepare(
@@ -76,12 +72,9 @@ export async function getFortune(
 
   // 3. 분석 → 프롬프트 → LLM → 파싱
   const analysis = await system.analyze(input as unknown as Record<string, unknown>);
-  const model: ClaudeModel = tier === 'detailed' ? 'sonnet' : 'haiku';
-  const prompt = tier === 'detailed' && system.buildDetailedPrompt
-    ? system.buildDetailedPrompt(analysis, category)
-    : system.buildPrompt(analysis, category);
-  const llmResponse = await callClaude(prompt, model);
-  const fortune = system.parseResult(llmResponse, tier);
+  const prompt = system.buildPrompt(analysis, category);
+  const llmResponse = await callClaude(prompt);
+  const fortune = system.parseResult(llmResponse);
 
   const data = analysis.data as Record<string, unknown>;
   const fp = data.fourPillars as Record<string, Record<string, string>> | undefined;

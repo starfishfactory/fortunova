@@ -30,6 +30,7 @@ export function HomePage() {
       <form
         hx-post="/partials/fortune-result"
         hx-target="#result"
+        hx-request='{"timeout": 150000}'
         class="glass-card p-6 space-y-5"
       >
         {/* 생년월일 */}
@@ -79,13 +80,8 @@ export function HomePage() {
               <span class="text-sm text-gray-300">양력</span>
             </label>
             <label class="flex items-center gap-1">
-              <input
-                type="radio"
-                name="calendarType"
-                value="lunar"
-                class="radio-dark"
-                onclick="document.getElementById('leapMonthField').style.display='block'"
-              />
+              <input type="radio" name="calendarType" value="lunar" class="radio-dark"
+                onclick="document.getElementById('leapMonthField').style.display='block'" />
               <span class="text-sm text-gray-300">음력</span>
             </label>
           </div>
@@ -127,20 +123,17 @@ export function HomePage() {
         </div>
 
         {/* 제출 버튼 */}
-        <button
-          type="submit"
-          class="btn-gold w-full py-3 rounded-lg font-medium text-base"
-        >
+        <button type="submit" class="btn-gold w-full py-3 rounded-lg font-medium text-base">
           운세 보기
         </button>
       </form>
       </div>
 
-      {/* 로딩 인디케이터 — JS로 표시/숨김 제어 */}
+      {/* 로딩 인디케이터 — JS로 display 제어 */}
       <div id="loading" style="display:none">
         <div class="loading-container text-center py-8">
           <div class="orb-glow mx-auto mb-4"></div>
-          <p class="text-gold-400 font-medium mb-2">운세를 분석하고 있습니다...</p>
+          <p class="text-gold-400 font-medium mb-2">AI가 운세를 분석하고 있습니다...</p>
           <p id="loading-tip" class="text-sm text-gray-400 transition-opacity duration-500"></p>
         </div>
       </div>

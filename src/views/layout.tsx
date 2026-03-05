@@ -9,16 +9,10 @@ export function Layout({ children, title }: { children: any; title?: string }) {
         <meta name="theme-color" content="#0a0e27" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        {/* Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        {/* HTMX */}
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-        {/* Tailwind CDN + Custom Config */}
         <script src="https://cdn.tailwindcss.com"></script>
         <script dangerouslySetInnerHTML={{
           __html: `tailwind.config = {
@@ -36,21 +30,16 @@ export function Layout({ children, title }: { children: any; title?: string }) {
             }
           }`,
         }} />
-        {/* Custom Styles (after Tailwind) */}
         <link rel="stylesheet" href="/public/styles.css" />
       </head>
       <body class="min-h-screen font-sans text-gray-200">
-        {/* Aurora animated background */}
         <div class="aurora-bg"></div>
-        {/* Starfield */}
         <div class="stars-container" id="stars"></div>
 
         <header class="glass-card sticky top-0 z-50" style="border-radius: 0; border-left: none; border-right: none; border-top: none;">
           <div class="max-w-md mx-auto flex items-center justify-between p-4">
             <a href="/" class="block group">
-              <h1 class="text-xl font-serif font-bold text-gold-400 group-hover:text-gold-300 transition-colors">
-                Fortunova
-              </h1>
+              <h1 class="text-xl font-serif font-bold text-gold-400 group-hover:text-gold-300 transition-colors">Fortunova</h1>
               <p class="text-xs text-gray-400 tracking-wider">AI 사주/명리 운세</p>
             </a>
             <nav class="flex items-center gap-3 text-sm">
@@ -67,27 +56,16 @@ export function Layout({ children, title }: { children: any; title?: string }) {
           &copy; 2026 Fortunova
         </footer>
 
-        {/* Star generation script */}
+        {/* Stars */}
         <script dangerouslySetInnerHTML={{
-          __html: `(function() {
-            var c = document.getElementById('stars');
-            if (!c) return;
-            var count = 35;
-            for (var i = 0; i < count; i++) {
-              var s = document.createElement('div');
-              s.className = 'star' + (Math.random() > 0.85 ? ' star--large' : '');
-              s.style.left = Math.random() * 100 + '%';
-              s.style.top = Math.random() * 100 + '%';
-              s.style.setProperty('--duration', (2 + Math.random() * 4) + 's');
-              s.style.setProperty('--delay', (Math.random() * 5) + 's');
-              c.appendChild(s);
-            }
-          })();`,
+          __html: `(function(){var c=document.getElementById('stars');if(!c)return;for(var i=0;i<35;i++){var s=document.createElement('div');s.className='star'+(Math.random()>0.85?' star--large':'');s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.setProperty('--duration',(2+Math.random()*4)+'s');s.style.setProperty('--delay',(Math.random()*5)+'s');c.appendChild(s)}})();`,
         }} />
-        {/* Form collapse + loading tips */}
+
+        {/* Form collapse + loading tips + cookie save/restore + localStorage cache */}
         <script dangerouslySetInnerHTML={{
           __html: `
 (function() {
+  // --- Loading tips ---
   var TIPS = [
     '사주(四柱)는 태어난 연·월·일·시의 네 기둥을 의미합니다',
     '천간(天干)은 갑·을·병·정·무·기·경·신·임·계 10가지입니다',
@@ -100,9 +78,7 @@ export function Layout({ children, title }: { children: any; title?: string }) {
     '상생(相生): 목→화→토→금→수→목 순으로 도움을 줍니다',
     '상극(相克): 목→토→수→화→금→목 순으로 억제합니다'
   ];
-  var tipIdx = Math.floor(Math.random() * TIPS.length);
-  var tipTimer = null;
-
+  var tipIdx = Math.floor(Math.random() * TIPS.length), tipTimer = null;
   function startTips() {
     var el = document.getElementById('loading-tip');
     if (!el) return;
@@ -116,50 +92,42 @@ export function Layout({ children, title }: { children: any; title?: string }) {
       }, 750);
     }, 5250);
   }
-  function stopTips() {
-    if (tipTimer) { clearInterval(tipTimer); tipTimer = null; }
-  }
+  function stopTips() { if (tipTimer) { clearInterval(tipTimer); tipTimer = null; } }
 
-  var CATEGORY_NAMES = { daily: '오늘의 운세', love: '연애운', career: '직장운', health: '건강운', wealth: '재물운' };
-
-  window.collapseForm = collapseForm;
-  window.expandForm = expandForm;
+  // --- Form collapse/expand ---
+  var CAT_NAMES = { daily:'오늘의 운세', love:'연애운', career:'직장운', health:'건강운', wealth:'재물운' };
   function collapseForm(form) {
     var sec = document.getElementById('form-section');
     var summary = document.getElementById('form-summary');
     if (sec) sec.classList.add('collapsed');
     if (summary && form) {
       var fd = new FormData(form);
-      var y = fd.get('year') || '?';
-      var m = fd.get('month') || '?';
-      var d = fd.get('day') || '?';
-      var g = fd.get('gender') === 'F' ? '여' : '남';
-      var cat = CATEGORY_NAMES[fd.get('category')] || '운세';
+      var y=fd.get('year')||'?', m=fd.get('month')||'?', d=fd.get('day')||'?';
+      var g = fd.get('gender')==='F'?'여':'남';
+      var cat = CAT_NAMES[fd.get('category')] || '운세';
       var txt = document.getElementById('summary-text');
-      if (txt) txt.textContent = y + '.' + m + '.' + d + ' (' + g + ') · ' + cat;
+      if (txt) txt.textContent = y+'.'+m+'.'+d+' ('+g+') · '+cat;
       summary.style.display = 'block';
     }
   }
-
   function expandForm() {
     var sec = document.getElementById('form-section');
     var summary = document.getElementById('form-summary');
     if (sec) sec.classList.remove('collapsed');
     if (summary) summary.style.display = 'none';
   }
+  window.collapseForm = collapseForm;
+  window.expandForm = expandForm;
 
   document.addEventListener('htmx:beforeRequest', function(evt) {
     var form = evt.detail.elt;
     if (!form || form.tagName !== 'FORM') return;
-    // detail 요청은 폼 접기 안함
-    var action = form.getAttribute('hx-post') || '';
-    if (action.includes('fortune-detail')) return;
     collapseForm(form);
     var ld = document.getElementById('loading');
     if (ld) ld.style.display = 'block';
     startTips();
   });
-  document.addEventListener('htmx:afterRequest', function(evt) {
+  document.addEventListener('htmx:afterRequest', function() {
     var ld = document.getElementById('loading');
     if (ld) ld.style.display = 'none';
     stopTips();
@@ -170,25 +138,17 @@ export function Layout({ children, title }: { children: any; title?: string }) {
     expandForm();
     stopTips();
   });
-  // 결과 영역 클릭으로 폼 펼치기
   document.addEventListener('click', function(evt) {
-    if (evt.target && evt.target.id === 'reopen-form') {
-      expandForm();
-    }
+    if (evt.target && evt.target.id === 'reopen-form') expandForm();
   });
-})();
-`,
-        }} />
-        {/* Cookie form save/restore */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-(function() {
-  var COOKIE_NAME = 'fortunova_input';
+
+  // --- Cookie form save/restore ---
+  var CK = 'fortunova_input';
   function saveCookie(data) {
-    document.cookie = COOKIE_NAME + '=' + encodeURIComponent(JSON.stringify(data)) + ';max-age=315360000;path=/';
+    document.cookie = CK+'='+encodeURIComponent(JSON.stringify(data))+';max-age=315360000;path=/';
   }
   function readCookie() {
-    var m = document.cookie.match('(?:^|; )' + COOKIE_NAME + '=([^;]*)');
+    var m = document.cookie.match(new RegExp('(?:^|; )'+CK+'=([^;]*)'));
     if (!m) return null;
     try { return JSON.parse(decodeURIComponent(m[1])); } catch(e) { return null; }
   }
@@ -198,9 +158,9 @@ export function Layout({ children, title }: { children: any; title?: string }) {
     var fd = {};
     form.querySelectorAll('select,input').forEach(function(el) {
       if (!el.name) return;
-      if (el.type === 'radio') { if (el.checked) fd[el.name] = el.value; }
-      else if (el.type === 'checkbox') { fd[el.name] = el.checked ? el.value : ''; }
-      else { fd[el.name] = el.value; }
+      if (el.type==='radio') { if (el.checked) fd[el.name]=el.value; }
+      else if (el.type==='checkbox') { fd[el.name]=el.checked?el.value:''; }
+      else { fd[el.name]=el.value; }
     });
     saveCookie(fd);
   });
@@ -208,87 +168,60 @@ export function Layout({ children, title }: { children: any; title?: string }) {
     var saved = readCookie();
     if (!saved) return;
     Object.keys(saved).forEach(function(name) {
-      var els = document.querySelectorAll('[name="' + name + '"]');
-      els.forEach(function(el) {
-        if (el.type === 'radio') { el.checked = (el.value === saved[name]); }
-        else if (el.type === 'checkbox') { el.checked = (saved[name] === el.value); }
-        else { el.value = saved[name]; }
+      document.querySelectorAll('[name="'+name+'"]').forEach(function(el) {
+        if (el.type==='radio') el.checked=(el.value===saved[name]);
+        else if (el.type==='checkbox') el.checked=(saved[name]===el.value);
+        else el.value=saved[name];
       });
     });
-    // 음력 선택 시 윤달 필드 표시
-    var calType = saved['calendarType'];
-    if (calType === 'lunar') {
-      var lf = document.getElementById('leapMonthField');
-      if (lf) lf.style.display = 'block';
+    if (saved['calendarType']==='lunar') {
+      var lf=document.getElementById('leapMonthField');
+      if (lf) lf.style.display='block';
     }
   });
-})();
-`,
-        }} />
-        {/* localStorage result caching */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-(function() {
-  var today = new Date().toISOString().slice(0, 10);
 
-  // 전날 캐시 자동 정리
+  // --- localStorage result cache ---
+  var today = new Date().toISOString().slice(0,10);
   try {
-    for (var i = localStorage.length - 1; i >= 0; i--) {
-      var k = localStorage.key(i);
-      if (k && k.startsWith('fortunova_result_') && !k.includes(today)) {
-        localStorage.removeItem(k);
-      }
+    for (var i=localStorage.length-1;i>=0;i--) {
+      var k=localStorage.key(i);
+      if (k&&k.startsWith('fortunova_result_')&&!k.includes(today)) localStorage.removeItem(k);
     }
   } catch(e) {}
-
-  function buildCacheKey(formEl, endpoint) {
-    var fd = new FormData(formEl);
-    var birth = (fd.get('year')||'') + '-' + (fd.get('month')||'') + '-' + (fd.get('day')||'') + '-' + (fd.get('gender')||'');
-    var cat = fd.get('category') || 'daily';
-    var suffix = endpoint.includes('fortune-detail') ? 'detailed' : 'basic';
-    return 'fortunova_result_' + today + '_' + cat + '_' + birth + '_' + suffix;
+  function buildCacheKey(formEl) {
+    var fd=new FormData(formEl);
+    var birth=(fd.get('year')||'')+'-'+(fd.get('month')||'')+'-'+(fd.get('day')||'')+'-'+(fd.get('gender')||'');
+    var cat=fd.get('category')||'daily';
+    return 'fortunova_result_'+today+'_'+cat+'_'+birth;
   }
-
   document.addEventListener('htmx:confirm', function(evt) {
-    var el = evt.detail.elt;
-    if (!el || el.tagName !== 'FORM') return;
-    var action = el.getAttribute('hx-post') || '';
+    var el=evt.detail.elt;
+    if (!el||el.tagName!=='FORM') return;
+    var action=el.getAttribute('hx-post')||'';
     if (!action.includes('fortune')) return;
-    var key = buildCacheKey(el, action);
-    var cached = null;
-    try { cached = localStorage.getItem(key); } catch(e) {}
+    var key=buildCacheKey(el);
+    var cached=null;
+    try { cached=localStorage.getItem(key); } catch(e) {}
     if (cached) {
       evt.preventDefault();
-      var targetId = el.getAttribute('hx-target') || '#result';
-      var target = document.querySelector(targetId);
-      if (target) {
-        target.innerHTML = cached;
-        // 메인 폼인 경우 요약 바와 함께 접기
-        if (!action.includes('fortune-detail') && window.collapseForm) {
-          window.collapseForm(el);
-        }
-      }
+      var target=document.querySelector(el.getAttribute('hx-target')||'#result');
+      if (target) { target.innerHTML=cached; collapseForm(el); }
     }
   });
-
   document.addEventListener('htmx:afterSwap', function(evt) {
-    var el = evt.detail.elt;
-    if (!el || el.tagName !== 'FORM') return;
-    var action = el.getAttribute('hx-post') || '';
+    var el=evt.detail.elt;
+    if (!el||el.tagName!=='FORM') return;
+    var action=el.getAttribute('hx-post')||'';
     if (!action.includes('fortune')) return;
-    var key = buildCacheKey(el, action);
-    var targetId = el.getAttribute('hx-target') || '#result';
-    var target = document.querySelector(targetId);
-    if (target) {
-      try { localStorage.setItem(key, target.innerHTML); } catch(e) {}
-    }
+    var key=buildCacheKey(el);
+    var target=document.querySelector(el.getAttribute('hx-target')||'#result');
+    if (target) { try { localStorage.setItem(key, target.innerHTML); } catch(e) {} }
   });
 })();
 `,
         }} />
-        {/* Service Worker */}
         <script dangerouslySetInnerHTML={{
-          __html: `if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js').catch(() => {}); }`,
+          __html: `if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js').catch(function(){}); }`,
         }} />
       </body>
     </html>
