@@ -13,10 +13,22 @@ export function HomePage() {
         <p class="text-sm text-gray-400">생년월일을 입력하고 오늘의 운세를 확인하세요</p>
       </div>
 
+      {/* 접힌 상태에서 보이는 입력 요약 */}
+      <div id="form-summary" class="form-summary" style="display:none">
+        <div class="glass-card p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-gold-400">🔮</span>
+            <span id="summary-text" class="text-gray-300"></span>
+          </div>
+          <button id="reopen-form" class="text-xs text-gold-400 hover:text-gold-300 underline cursor-pointer shrink-0">
+            다시 입력
+          </button>
+        </div>
+      </div>
+
+      <div id="form-section" class="form-section">
       <form
-        hx-post="/partials/fortune-result"
-        hx-target="#result"
-        hx-indicator="#loading"
+        id="fortune-form"
         class="glass-card p-6 space-y-5"
       >
         {/* 생년월일 */}
@@ -66,13 +78,8 @@ export function HomePage() {
               <span class="text-sm text-gray-300">양력</span>
             </label>
             <label class="flex items-center gap-1">
-              <input
-                type="radio"
-                name="calendarType"
-                value="lunar"
-                class="radio-dark"
-                onclick="document.getElementById('leapMonthField').style.display='block'"
-              />
+              <input type="radio" name="calendarType" value="lunar" class="radio-dark"
+                onclick="document.getElementById('leapMonthField').style.display='block'" />
               <span class="text-sm text-gray-300">음력</span>
             </label>
           </div>
@@ -114,17 +121,36 @@ export function HomePage() {
         </div>
 
         {/* 제출 버튼 */}
-        <button
-          type="submit"
-          class="btn-gold w-full py-3 rounded-lg font-medium text-base"
-        >
+        <button type="submit" class="btn-gold w-full py-3 rounded-lg font-medium text-base">
           운세 보기
         </button>
       </form>
+      </div>
 
-      {/* 로딩 인디케이터 */}
-      <div id="loading" class="htmx-indicator text-center py-6">
-        <p class="text-gold-400 animate-pulse font-medium">운세를 분석하고 있습니다...</p>
+      {/* 로딩 인디케이터 — SSE 진행 표시 */}
+      <div id="loading" style="display:none">
+        <div class="loading-container text-center py-8">
+          <div class="orb-glow mx-auto mb-4"></div>
+          <p class="text-gold-400 font-medium mb-2">AI가 운세를 분석하고 있습니다...</p>
+          <div class="sse-progress mx-auto mt-4" style="max-width: 280px;">
+            <div class="sse-step" id="step-core">
+              <div class="sse-step-icon">🔮</div>
+              <div class="sse-step-label">종합 운세 분석</div>
+              <div class="sse-step-status" id="step-core-status"></div>
+            </div>
+            <div class="sse-step" id="step-sub">
+              <div class="sse-step-icon">📊</div>
+              <div class="sse-step-label">세부 운세 계산</div>
+              <div class="sse-step-status" id="step-sub-status"></div>
+            </div>
+            <div class="sse-step" id="step-meta">
+              <div class="sse-step-icon">🍀</div>
+              <div class="sse-step-label">행운 정보 생성</div>
+              <div class="sse-step-status" id="step-meta-status"></div>
+            </div>
+          </div>
+          <p id="loading-tip" class="text-sm text-gray-400 transition-opacity duration-500 mt-4"></p>
+        </div>
       </div>
 
       {/* 결과 영역 */}

@@ -36,25 +36,16 @@ class Semaphore {
   }
 }
 
-const claudeSemaphore = new Semaphore(1);
+const claudeSemaphore = new Semaphore(3);
 
 /** 테스트용 세마포어 리셋 */
 export function _resetSemaphore(): void {
   claudeSemaphore.reset();
 }
 
-function buildCommand(prompt: string): { cmd: string; args: string[] } {
-  if (config.claudeMode === 'docker') {
-    return {
-      cmd: 'docker',
-      args: ['exec', config.claudeContainer, 'claude', '-p', prompt, '--output-format', 'text'],
-    };
-  }
-  return { cmd: 'claude', args: ['--print', '-p', prompt] };
-}
-
 /**
- * Claude CLI headless 모드로 프롬프트를 전송하고 응답을 받는다.
+ * Claude Sonnet으로 프롬프트를 전송하고 응답을 받는다.
+ * Base64 인코딩으로 프롬프트의 특수문자 이스케이프 문제를 회피한다.
  */
 export async function callClaude(prompt: string): Promise<string> {
   await claudeSemaphore.acquire();
@@ -66,16 +57,34 @@ export async function callClaude(prompt: string): Promise<string> {
 }
 
 function executeClaudeCli(prompt: string): Promise<string> {
-  const { cmd, args } = buildCommand(prompt);
+  const timeout = Math.max(config.claudeTimeout, 120000);
+  const b64 = Buffer.from(prompt, 'utf-8').toString('base64');
+
   return new Promise((resolve, reject) => {
+    let cmd: string;
+    let args: string[];
+
+    if (config.claudeMode === 'docker') {
+      // Base64 → 임시파일 → claude -p "$(cat file)" 방식으로 안전하게 전달
+      cmd = 'docker';
+      args = [
+        'exec', config.claudeContainer,
+        'sh', '-c',
+        `echo '${b64}' | base64 -d > /tmp/_cp.txt && claude -p "$(cat /tmp/_cp.txt)" --output-format text --model haiku; rm -f /tmp/_cp.txt`,
+      ];
+    } else {
+      cmd = 'sh';
+      args = ['-c', `echo '${b64}' | base64 -d > /tmp/_cp.txt && claude --print -p "$(cat /tmp/_cp.txt)" --model haiku; rm -f /tmp/_cp.txt`];
+    }
+
     execFile(
       cmd,
       args,
-      { timeout: config.claudeTimeout },
-      (error, stdout, _stderr) => {
+      { timeout, maxBuffer: 10 * 1024 * 1024 },
+      (error, stdout, stderr) => {
         if (error) {
           if ((error as NodeJS.ErrnoException & { killed?: boolean }).killed) {
-            reject(new Error(`Claude CLI 타임아웃 (${config.claudeTimeout / 1000}초 초과)`));
+            reject(new Error(`Claude CLI 타임아웃 (${timeout / 1000}초 초과)`));
             return;
           }
           reject(new Error(`Claude CLI 에러: ${error.message}`));
@@ -83,7 +92,7 @@ function executeClaudeCli(prompt: string): Promise<string> {
         }
         const result = stdout.trim();
         if (!result) {
-          reject(new Error('Claude CLI 빈 응답'));
+          reject(new Error(`Claude CLI 빈 응답 (stderr: ${(stderr ?? '').slice(0, 200)})`));
           return;
         }
         resolve(result);

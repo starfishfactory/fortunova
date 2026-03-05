@@ -1,13 +1,78 @@
 import { Hono } from 'hono';
+import { streamSSE } from 'hono/streaming';
 import type { BirthInput } from '@/engine/types/index.js';
 import type { FortuneCategory } from '@/fortune/types.js';
 import type { AppEnv } from '@/types/hono.js';
-import { getFortune } from '@/services/fortune.js';
+import { getFortune, getFortuneStream } from '@/services/fortune.js';
 import { FortuneResultPartial } from '@/views/fortune-result.js';
 import { ErrorPartial } from '@/views/error.js';
 import { LimitExceededPartial } from '@/views/limit-exceeded.js';
-
 const fortunePartials = new Hono<AppEnv>();
+
+/** SSE 스트리밍 운세 */
+fortunePartials.get('/fortune-stream', async (c) => {
+  const q = c.req.query();
+  const year = q['year'];
+  const month = q['month'];
+  const day = q['day'];
+  const hour = q['hour'];
+  const gender = q['gender'];
+  const calendarType = q['calendarType'];
+  const isLeapMonth = q['isLeapMonth'];
+  const category = q['category'] || 'daily';
+
+  if (!year || !month || !day || !gender) {
+    return c.text('missing params', 400);
+  }
+
+  const input: BirthInput = {
+    year: Number(year),
+    month: Number(month),
+    day: Number(day),
+    hour: hour ? Number(hour) : null,
+    gender: gender as 'M' | 'F',
+    isLunar: calendarType === 'lunar',
+    isLeapMonth: isLeapMonth === 'true',
+  };
+
+  const identifier = c.get('identifier') as string || 'anon:unknown';
+  const identifierType = (c.get('identifierType') as 'user' | 'anonymous') || 'anonymous';
+
+  return streamSSE(c, async (stream) => {
+    console.log('[sse] stream opened');
+    try {
+      await getFortuneStream(
+        input,
+        category as FortuneCategory,
+        'saju',
+        identifier,
+        identifierType,
+        async (event) => {
+          console.log('[sse] event:', event.type, event.type === 'progress' ? event.chunk : '');
+          try {
+            if (event.type === 'progress') {
+              await stream.writeSSE({ data: JSON.stringify({ type: 'progress', chunk: event.chunk, elapsed: event.elapsed }) });
+            } else if (event.type === 'cached') {
+              await stream.writeSSE({ data: JSON.stringify({ type: 'progress', chunk: 'cached', elapsed: 0 }) });
+            } else if (event.type === 'done') {
+              // HTML은 SSE로 보내지 않고, 완료 신호만 전송
+              await stream.writeSSE({ data: JSON.stringify({ type: 'done' }) });
+            } else if (event.type === 'error') {
+              await stream.writeSSE({ data: JSON.stringify({ type: 'error', message: event.message }) });
+            }
+          } catch (innerErr) {
+            console.error('[sse] event handler error:', (innerErr as Error).message, (innerErr as Error).stack);
+          }
+        },
+      );
+    } catch (outerErr) {
+      console.error('[sse] stream error:', (outerErr as Error).message, (outerErr as Error).stack);
+    }
+    // flush 대기 후 종료
+    await new Promise((r) => setTimeout(r, 500));
+    console.log('[sse] stream closing');
+  });
+});
 
 fortunePartials.post('/fortune-result', async (c) => {
   const body = await c.req.parseBody();
