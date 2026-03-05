@@ -70,11 +70,11 @@ function executeClaudeCli(prompt: string): Promise<string> {
       args = [
         'exec', config.claudeContainer,
         'sh', '-c',
-        `echo '${b64}' | base64 -d | claude --output-format text --model sonnet`,
+        `echo '${b64}' | base64 -d | claude --output-format text --model haiku`,
       ];
     } else {
       cmd = 'sh';
-      args = ['-c', `echo '${b64}' | base64 -d | claude --print --model sonnet`];
+      args = ['-c', `echo '${b64}' | base64 -d | claude --print --model haiku`];
     }
 
     execFile(
