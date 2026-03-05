@@ -363,6 +363,229 @@
   background: var(--gold-600);
 }
 
+/* --- Form Section Collapse --- */
+
+.form-section {
+  max-height: 1200px;
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.4s ease;
+  opacity: 1;
+}
+
+.form-section.collapsed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form-summary {
+  transition: opacity 0.3s ease;
+}
+
+/* --- Loading Indicator --- */
+
+.loading-container {
+  padding: 2rem 1rem;
+}
+
+.orb-glow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-400), var(--gold-600));
+  box-shadow:
+    0 0 20px rgba(212, 168, 83, 0.4),
+    0 0 60px rgba(212, 168, 83, 0.2);
+  animation: orb-pulse 2s ease-in-out infinite;
+}
+
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(212,168,83,0.4), 0 0 60px rgba(212,168,83,0.2); }
+  50% { transform: scale(1.15); box-shadow: 0 0 30px rgba(212,168,83,0.6), 0 0 80px rgba(212,168,83,0.3); }
+}
+
+/* --- Sub-fortune Grid --- */
+
+.sub-fortune-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* --- Lucky Card --- */
+
+.lucky-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 168, 83, 0.1);
+}
+
+/* --- Proverb Card --- */
+
+.proverb-card {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(212, 168, 83, 0.04);
+  border: 1px solid rgba(212, 168, 83, 0.15);
+  position: relative;
+}
+
+.proverb-card::before {
+  content: '❝';
+  position: absolute;
+  top: 0.25rem;
+  left: 0.75rem;
+  font-size: 1.5rem;
+  color: rgba(212, 168, 83, 0.2);
+}
+
+/* --- Section Cards --- */
+
+.section-card {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border-left: 3px solid transparent;
+}
+
+.section-card--gold {
+  background: rgba(212, 168, 83, 0.04);
+  border-left-color: var(--gold-500);
+}
+
+.section-card--warn {
+  background: rgba(239, 68, 68, 0.04);
+  border-left-color: #ef4444;
+}
+
+/* --- Score Glow --- */
+
+.score-glow {
+  border-radius: 1rem;
+  background: rgba(212, 168, 83, 0.06);
+  border: 1px solid rgba(212, 168, 83, 0.15);
+}
+
+/* --- Fortune Reveal Animation --- */
+
+.fortune-reveal {
+  animation: fortune-fade-in 0.6s ease-out;
+}
+
+@keyframes fortune-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Divider --- */
+
+.divider-gold {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-600), transparent);
+  margin: 0.75rem 0;
+}
+
+/* --- SSE Progress Steps --- */
+
+.sse-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sse-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: border-color 0.4s ease, background 0.4s ease;
+}
+
+.sse-step.active {
+  border-color: rgba(212, 168, 83, 0.3);
+  background: rgba(212, 168, 83, 0.06);
+}
+
+.sse-step.done {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.06);
+}
+
+.sse-step.failed {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.sse-step-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sse-step-label {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.sse-step.active .sse-step-label {
+  color: var(--gold-400);
+}
+
+.sse-step.done .sse-step-label {
+  color: #4ade80;
+}
+
+.sse-step-status {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 40px;
+  text-align: right;
+}
+
+.sse-step.done .sse-step-status {
+  color: #4ade80;
+}
+
+@keyframes sse-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.sse-step.active .sse-step-icon {
+  animation: sse-pulse 1.5s ease-in-out infinite;
+}
+
+/* --- Gold Outline Button --- */
+
+.btn-gold-outline {
+  background: transparent;
+  color: var(--gold-400);
+  font-weight: 500;
+  border: 1px solid var(--gold-500);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn-gold-outline:hover {
+  background: rgba(212, 168, 83, 0.1);
+  box-shadow: 0 0 12px rgba(212, 168, 83, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-gold-outline:active {
+  transform: translateY(0);
+}
+
 /* --- Accessibility: Reduced Motion --- */
 
 @media (prefers-reduced-motion: reduce) {
