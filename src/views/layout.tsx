@@ -215,7 +215,11 @@ export function Layout({ children, title }: { children: any; title?: string }) {
     if (!action.includes('fortune')) return;
     var key=buildCacheKey(el);
     var target=document.querySelector(el.getAttribute('hx-target')||'#result');
-    if (target) { try { localStorage.setItem(key, target.innerHTML); } catch(e) {} }
+    if (target) {
+      var html=target.innerHTML;
+      if (html.indexOf('파싱에 실패')!==-1||html.indexOf('LLM_UNAVAILABLE')!==-1||html.indexOf('VALIDATION_ERROR')!==-1) return;
+      try { localStorage.setItem(key, html); } catch(e) {}
+    }
   });
 })();
 `,

@@ -87,19 +87,22 @@ export async function getFortune(
     todayElement: (data.usefulGod as string) ?? '',
   };
 
-  // 4. 캐시 저장
-  const expiresAt = `${date}T23:59:59`;
-  db.prepare(
-    `INSERT OR REPLACE INTO fortune_cache (cache_key, date, category, system_id, saju_data, fortune, score, expires_at, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    cacheKey, date, category, systemId,
-    JSON.stringify(sajuSummary),
-    JSON.stringify(fortune),
-    fortune.score,
-    expiresAt,
-    new Date().toISOString(),
-  );
+  // 4. 캐시 저장 (파싱 실패 응답은 캐시하지 않음)
+  const isError = fortune.summary.includes('파싱에 실패') || fortune.advice === '재시도를 권장합니다.';
+  if (!isError) {
+    const expiresAt = `${date}T23:59:59`;
+    db.prepare(
+      `INSERT OR REPLACE INTO fortune_cache (cache_key, date, category, system_id, saju_data, fortune, score, expires_at, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      cacheKey, date, category, systemId,
+      JSON.stringify(sajuSummary),
+      JSON.stringify(fortune),
+      fortune.score,
+      expiresAt,
+      new Date().toISOString(),
+    );
+  }
 
   // 5. 사용량 증가
   const usage = db.prepare(
