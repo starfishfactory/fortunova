@@ -65,16 +65,16 @@ function executeClaudeCli(prompt: string): Promise<string> {
     let args: string[];
 
     if (config.claudeMode === 'docker') {
-      // Base64로 인코딩된 프롬프트를 디코딩하여 claude에 전달
+      // Base64 → 임시파일 → claude -p "$(cat file)" 방식으로 안전하게 전달
       cmd = 'docker';
       args = [
         'exec', config.claudeContainer,
         'sh', '-c',
-        `echo '${b64}' | base64 -d | claude --output-format text --model haiku`,
+        `echo '${b64}' | base64 -d > /tmp/_cp.txt && claude -p "$(cat /tmp/_cp.txt)" --output-format text --model haiku; rm -f /tmp/_cp.txt`,
       ];
     } else {
       cmd = 'sh';
-      args = ['-c', `echo '${b64}' | base64 -d | claude --print --model haiku`];
+      args = ['-c', `echo '${b64}' | base64 -d > /tmp/_cp.txt && claude --print -p "$(cat /tmp/_cp.txt)" --model haiku; rm -f /tmp/_cp.txt`];
     }
 
     execFile(

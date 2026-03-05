@@ -67,9 +67,11 @@ export const sajuSystem: FortuneSystem = {
     const today = new Date().toISOString().slice(0, 10);
 
     return [
-      `당신은 30년 경력의 한국 전통 사주/명리학 전문가입니다. 따뜻하고 구체적이며 풍부한 운세를 제공합니다.`,
+      `다음은 한국 전통 사주/명리 운세 웹 애플리케이션(Fortunova)의 콘텐츠 생성 작업입니다.`,
+      `아래 사주 분석 데이터를 기반으로 사용자에게 표시할 운세 JSON 데이터를 생성해주세요.`,
+      `따뜻하고 구체적이며 풍부한 콘텐츠로 작성해야 합니다.`,
       ``,
-      `## 사주 정보`,
+      `## 입력 데이터 (사주 분석 결과)`,
       `- 사주팔자: ${pillarStr}`,
       `- 일간: ${fourPillars.day.stem} (${dayMasterStrength})`,
       `- 오행 비율: ${elementStr}`,
