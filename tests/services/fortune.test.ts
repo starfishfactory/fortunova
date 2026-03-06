@@ -34,13 +34,33 @@ vi.mock('@/db/connection.js', () => ({
   getDatabase: vi.fn(),
 }));
 
+// buildChunkPrompts와 mergeChunkResults mock
+vi.mock('@/fortune/systems/saju-system.js', () => ({
+  buildChunkPrompts: vi.fn().mockReturnValue({
+    core: 'core prompt',
+    sub: 'sub prompt',
+    meta: 'meta prompt',
+  }),
+  mergeChunkResults: vi.fn(),
+  sajuSystem: {
+    id: 'saju',
+    name: '사주/명리',
+    requiredInput: [],
+    analyze: vi.fn(),
+    buildPrompt: vi.fn(),
+    parseResult: vi.fn(),
+  },
+}));
+
 import { getFortune } from '@/services/fortune.js';
 import { callClaude } from '@/services/llm.js';
 import { fortuneRegistry } from '@/fortune/registry.js';
 import { getDatabase } from '@/db/connection.js';
+import { mergeChunkResults } from '@/fortune/systems/saju-system.js';
 
 const mockCallClaude = vi.mocked(callClaude);
 const mockGetDatabase = vi.mocked(getDatabase);
+const mockMergeChunkResults = vi.mocked(mergeChunkResults);
 
 const mockFortuneResult: FortuneResult = {
   summary: '오늘은 좋은 날입니다',
@@ -53,7 +73,16 @@ const mockFortuneResult: FortuneResult = {
 
 const mockSystemAnalysis: SystemAnalysis = {
   systemId: 'saju',
-  data: { fourPillars: '경오 신사 갑자 병인', dayMasterStrength: 'weak', todayElement: '목' },
+  data: {
+    fourPillars: {
+      year: { stem: '경', branch: '오' },
+      month: { stem: '신', branch: '사' },
+      day: { stem: '갑', branch: '자' },
+      hour: { stem: '병', branch: '인' },
+    },
+    dayMasterStrength: 'weak',
+    usefulGod: '목',
+  },
 };
 
 const mockFortuneSystem: FortuneSystem = {
@@ -96,6 +125,7 @@ describe('getFortune', () => {
     vi.clearAllMocks();
     (fortuneRegistry as any)._clear();
     fortuneRegistry.register(mockFortuneSystem);
+    mockMergeChunkResults.mockReturnValue(mockFortuneResult);
   });
 
   it('캐시 히트 시 LLM을 호출하지 않는다', async () => {
@@ -135,9 +165,9 @@ describe('getFortune', () => {
     expect(result.cached).toBe(false);
     expect(result.fortune).toEqual(mockFortuneResult);
     expect(mockFortuneSystem.analyze).toHaveBeenCalled();
-    expect(mockFortuneSystem.buildPrompt).toHaveBeenCalledWith(mockSystemAnalysis, 'daily');
-    expect(mockCallClaude).toHaveBeenCalledWith('테스트 프롬프트');
-    expect(mockFortuneSystem.parseResult).toHaveBeenCalledWith(llmResponse);
+    // 3청크 병렬 호출
+    expect(mockCallClaude).toHaveBeenCalledTimes(3);
+    expect(mockMergeChunkResults).toHaveBeenCalled();
   });
 
   it('캐시 미스 시 결과를 DB에 저장한다', async () => {

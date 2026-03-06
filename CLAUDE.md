@@ -36,7 +36,7 @@ npm run typecheck  # 타입 체크
 - `src/engine/saju/` - 사주팔자 계산
 - `src/engine/analysis/` - 십신/오행균형/일간강약
 - `src/fortune/` - FortuneSystem 플러그인
-- `src/services/` - LLM, 인증, 구독
+- `src/services/` - LLM, 인증, 운세
 - `src/routes/` - API 라우트
 - `src/views/` - JSX 템플릿
 - `src/db/` - Drizzle ORM 스키마

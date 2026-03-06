@@ -48,11 +48,13 @@ describe('callClaude', () => {
 
       expect(result).toBe('운세 결과입니다');
       expect(mockExecFile).toHaveBeenCalledWith(
-        'claude',
-        ['--print', '-p', '테스트 프롬프트'],
-        expect.objectContaining({ timeout: 60000 }),
+        'sh',
+        expect.arrayContaining(['-c']),
+        expect.objectContaining({ timeout: expect.any(Number), maxBuffer: 10 * 1024 * 1024 }),
         expect.any(Function),
       );
+      const callArgs = mockExecFile.mock.calls[0];
+      expect((callArgs[2] as { timeout: number }).timeout).toBeGreaterThanOrEqual(120000);
     });
 
     it('타임아웃 시 에러를 던진다', async () => {
@@ -89,51 +91,45 @@ describe('callClaude', () => {
       await expect(callClaude('테스트')).rejects.toThrow('Claude CLI 빈 응답');
     });
 
-    it('세마포어가 동시 호출을 1개로 제한한다', async () => {
-      let resolveFirst: () => void;
-      let resolveSecond: () => void;
-
+    it('세마포어가 동시 호출을 3개로 제한한다', async () => {
+      const resolvers: (() => void)[] = [];
       const callOrder: string[] = [];
 
-      mockExecFile
-        .mockImplementationOnce((_cmd, _args, _opts, callback) => {
-          resolveFirst = () => {
-            callOrder.push('first-done');
-            (callback as ExecFileCallback)(null, '첫 번째 결과', '');
+      for (let i = 0; i < 4; i++) {
+        mockExecFile.mockImplementationOnce((_cmd, _args, _opts, callback) => {
+          const idx = i;
+          resolvers[idx] = () => {
+            callOrder.push(`${idx}-done`);
+            (callback as ExecFileCallback)(null, `결과${idx}`, '');
           };
-          callOrder.push('first-start');
-          return {} as ChildProcess;
-        })
-        .mockImplementationOnce((_cmd, _args, _opts, callback) => {
-          resolveSecond = () => {
-            callOrder.push('second-done');
-            (callback as ExecFileCallback)(null, '두 번째 결과', '');
-          };
-          callOrder.push('second-start');
+          callOrder.push(`${idx}-start`);
           return {} as ChildProcess;
         });
+      }
 
       const { callClaude } = await import('@/services/llm.js');
-      const promise1 = callClaude('첫 번째');
-      const promise2 = callClaude('두 번째');
+      const promises = [0, 1, 2, 3].map((i) => callClaude(`호출${i}`));
+
+      // 3개까지 동시 시작, 4번째는 대기
+      await vi.waitFor(() => {
+        expect(callOrder).toContain('0-start');
+        expect(callOrder).toContain('1-start');
+        expect(callOrder).toContain('2-start');
+      });
+      expect(callOrder).not.toContain('3-start');
+
+      // 하나 완료하면 4번째 시작
+      resolvers[0]();
+      await promises[0];
 
       await vi.waitFor(() => {
-        expect(callOrder).toContain('first-start');
-      });
-      expect(callOrder).not.toContain('second-start');
-
-      resolveFirst!();
-      await promise1;
-
-      await vi.waitFor(() => {
-        expect(callOrder).toContain('second-start');
+        expect(callOrder).toContain('3-start');
       });
 
-      resolveSecond!();
-      const result2 = await promise2;
-
-      expect(result2).toBe('두 번째 결과');
-      expect(callOrder).toEqual(['first-start', 'first-done', 'second-start', 'second-done']);
+      resolvers[1]();
+      resolvers[2]();
+      resolvers[3]();
+      await Promise.all(promises);
     });
   });
 
@@ -154,10 +150,12 @@ describe('callClaude', () => {
       expect(result).toBe('도커 운세 결과');
       expect(mockExecFile).toHaveBeenCalledWith(
         'docker',
-        ['exec', 'claude-api', 'claude', '-p', '테스트 프롬프트', '--output-format', 'text'],
-        expect.objectContaining({ timeout: 60000 }),
+        ['exec', 'claude-api', 'sh', '-c', expect.stringContaining('claude')],
+        expect.objectContaining({ timeout: expect.any(Number), maxBuffer: 10 * 1024 * 1024 }),
         expect.any(Function),
       );
+      const callArgs = mockExecFile.mock.calls[0];
+      expect((callArgs[2] as { timeout: number }).timeout).toBeGreaterThanOrEqual(120000);
     });
 
     it('커스텀 컨테이너 이름을 사용한다', async () => {
@@ -173,8 +171,8 @@ describe('callClaude', () => {
 
       expect(mockExecFile).toHaveBeenCalledWith(
         'docker',
-        ['exec', 'my-claude', 'claude', '-p', '테스트', '--output-format', 'text'],
-        expect.objectContaining({ timeout: 60000 }),
+        ['exec', 'my-claude', 'sh', '-c', expect.stringContaining('claude')],
+        expect.objectContaining({ timeout: expect.any(Number), maxBuffer: 10 * 1024 * 1024 }),
         expect.any(Function),
       );
     });
