@@ -26,7 +26,7 @@ describe('Pages 라우트', () => {
     const html = await res.text();
     expect(html).toContain('hx-post');
     expect(html).toContain('hx-target');
-    expect(html).toContain('hx-indicator');
+    expect(html).toContain('hx-request');
     expect(html).toContain('htmx.org');
   });
 

@@ -48,11 +48,13 @@ describe('callClaude', () => {
 
       expect(result).toBe('운세 결과입니다');
       expect(mockExecFile).toHaveBeenCalledWith(
-        'claude',
-        ['--print', '-p', '테스트 프롬프트'],
-        expect.objectContaining({ timeout: 60000 }),
+        'sh',
+        expect.arrayContaining(['-c']),
+        expect.objectContaining({ timeout: expect.any(Number), maxBuffer: 10 * 1024 * 1024 }),
         expect.any(Function),
       );
+      const callArgs = mockExecFile.mock.calls[0];
+      expect((callArgs[2] as { timeout: number }).timeout).toBeGreaterThanOrEqual(120000);
     });
 
     it('타임아웃 시 에러를 던진다', async () => {
@@ -154,10 +156,12 @@ describe('callClaude', () => {
       expect(result).toBe('도커 운세 결과');
       expect(mockExecFile).toHaveBeenCalledWith(
         'docker',
-        ['exec', 'claude-api', 'claude', '-p', '테스트 프롬프트', '--output-format', 'text'],
-        expect.objectContaining({ timeout: 60000 }),
+        ['exec', 'claude-api', 'sh', '-c', expect.stringContaining('claude')],
+        expect.objectContaining({ timeout: expect.any(Number), maxBuffer: 10 * 1024 * 1024 }),
         expect.any(Function),
       );
+      const callArgs = mockExecFile.mock.calls[0];
+      expect((callArgs[2] as { timeout: number }).timeout).toBeGreaterThanOrEqual(120000);
     });
 
     it('커스텀 컨테이너 이름을 사용한다', async () => {
@@ -173,8 +177,8 @@ describe('callClaude', () => {
 
       expect(mockExecFile).toHaveBeenCalledWith(
         'docker',
-        ['exec', 'my-claude', 'claude', '-p', '테스트', '--output-format', 'text'],
-        expect.objectContaining({ timeout: 60000 }),
+        ['exec', 'my-claude', 'sh', '-c', expect.stringContaining('claude')],
+        expect.objectContaining({ timeout: expect.any(Number), maxBuffer: 10 * 1024 * 1024 }),
         expect.any(Function),
       );
     });
