@@ -158,6 +158,24 @@ export function FortuneResultPartial({ fortune, sajuSummary, cached, remainingFr
         </div>
       )}
 
+      {/* 공유하기 */}
+      <div class="mt-4 text-center">
+        <button
+          id="share-btn"
+          type="button"
+          class="btn-gold-outline px-5 py-2.5 text-sm"
+          data-score={String(fortune.score)}
+          data-summary={fortune.summary}
+          data-advice={fortune.advice}
+          data-lucky-color={fortune.lucky?.color ?? ''}
+          data-lucky-number={fortune.lucky?.number != null ? String(fortune.lucky.number) : ''}
+          data-proverb={fortune.proverb ?? ''}
+        >
+          📤 공유하기
+        </button>
+        <p id="share-feedback" class="text-xs text-gold-300 mt-2" style="display:none;"></p>
+      </div>
+
       {/* 사주 정보 + 메타 */}
       <div class="text-sm text-gray-500 mt-4 p-3 rounded" style="background: rgba(255,255,255,0.02);">
         <p>🏛 사주: {sajuSummary.fourPillars}</p>

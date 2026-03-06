@@ -36,7 +36,7 @@ class Semaphore {
   }
 }
 
-const claudeSemaphore = new Semaphore(1);
+const claudeSemaphore = new Semaphore(3);
 
 /** 테스트용 세마포어 리셋 */
 export function _resetSemaphore(): void {

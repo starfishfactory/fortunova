@@ -21,12 +21,11 @@ describe('Pages 라우트', () => {
     expect(html).toContain('name="category"');
   });
 
-  it('GET / 응답에 HTMX 속성이 포함된다', async () => {
+  it('GET / 응답에 HTMX 및 폼 요소가 포함된다', async () => {
     const res = await app.request('/');
     const html = await res.text();
-    expect(html).toContain('hx-post');
-    expect(html).toContain('hx-target');
-    expect(html).toContain('hx-request');
+    expect(html).toContain('id="fortune-form"');
+    expect(html).toContain('id="result"');
     expect(html).toContain('htmx.org');
   });
 

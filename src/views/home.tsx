@@ -28,9 +28,7 @@ export function HomePage() {
 
       <div id="form-section" class="form-section">
       <form
-        hx-post="/partials/fortune-result"
-        hx-target="#result"
-        hx-request='{"timeout": 150000}'
+        id="fortune-form"
         class="glass-card p-6 space-y-5"
       >
         {/* 생년월일 */}
@@ -129,12 +127,29 @@ export function HomePage() {
       </form>
       </div>
 
-      {/* 로딩 인디케이터 — JS로 display 제어 */}
+      {/* 로딩 인디케이터 — SSE 진행 표시 */}
       <div id="loading" style="display:none">
         <div class="loading-container text-center py-8">
           <div class="orb-glow mx-auto mb-4"></div>
           <p class="text-gold-400 font-medium mb-2">AI가 운세를 분석하고 있습니다...</p>
-          <p id="loading-tip" class="text-sm text-gray-400 transition-opacity duration-500"></p>
+          <div class="sse-progress mx-auto mt-4" style="max-width: 280px;">
+            <div class="sse-step" id="step-core">
+              <div class="sse-step-icon">🔮</div>
+              <div class="sse-step-label">종합 운세 분석</div>
+              <div class="sse-step-status" id="step-core-status"></div>
+            </div>
+            <div class="sse-step" id="step-sub">
+              <div class="sse-step-icon">📊</div>
+              <div class="sse-step-label">세부 운세 계산</div>
+              <div class="sse-step-status" id="step-sub-status"></div>
+            </div>
+            <div class="sse-step" id="step-meta">
+              <div class="sse-step-icon">🍀</div>
+              <div class="sse-step-label">행운 정보 생성</div>
+              <div class="sse-step-status" id="step-meta-status"></div>
+            </div>
+          </div>
+          <p id="loading-tip" class="text-sm text-gray-400 transition-opacity duration-500 mt-4"></p>
         </div>
       </div>
 
