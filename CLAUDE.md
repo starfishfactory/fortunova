@@ -36,7 +36,7 @@ npm run typecheck        # 타입 체크
 - **설정**: `playwright.config.ts`, 테스트: `tests/e2e/`
 - **구성**: health(6) + auth(4) + fortune(3) + subscription(5) = 18개
 - 기능 변경 후 `npm run test:e2e`로 실 서버 동작 검증할 것
-- 운세 결과는 20개 항목 소프트 체크 (70% 이상 통과 필요)
+- 운세 결과는 20개 항목 전체 통과 필요 (100%)
 - `CI` 환경변수 유무로 headless/headed 자동 전환
 
 ## 디렉토리 구조

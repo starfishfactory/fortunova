@@ -97,7 +97,7 @@ test.describe('운세 조회 플로우', () => {
     }
 
     expect(passed, `통과 항목 ${passed}/${checks.length}, 미통과: ${failed.join(', ')}`)
-      .toBeGreaterThanOrEqual(Math.ceil(checks.length * 0.7));
+      .toBe(checks.length);
   });
 
   test('다시 입력 버튼이 폼을 다시 펼친다', async ({ page }) => {
