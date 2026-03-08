@@ -7,6 +7,13 @@ export function Layout({ children, title }: { children: any; title?: string }) {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{title ? `${title} - ` : ''}Fortunova - AI 사주/명리 운세</title>
+        <meta name="description" content="AI 기반 사주/명리 운세 서비스. 생년월일을 입력하면 사주팔자 분석과 오늘의 운세를 확인할 수 있습니다." />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Fortunova - AI 사주/명리 운세" />
+        <meta property="og:description" content="AI 기반 사주팔자 분석과 오늘의 운세를 확인하세요." />
+        <meta property="og:image" content="https://fortunova.molidae.site/public/og-image.png" />
+        <meta property="og:url" content="https://fortunova.molidae.site" />
+        <link rel="icon" href="/public/favicon.svg" type="image/svg+xml" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0a0e27" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -36,6 +43,7 @@ export function Layout({ children, title }: { children: any; title?: string }) {
         <meta name="x-build" content={BUILD_TS} />
       </head>
       <body class="min-h-screen font-sans text-gray-200">
+        <a href="#main-content" class="skip-link">본문으로 건너뛰기</a>
         <div class="aurora-bg"></div>
         <div class="stars-container" id="stars"></div>
 
@@ -45,13 +53,13 @@ export function Layout({ children, title }: { children: any; title?: string }) {
               <h1 class="text-xl font-serif font-bold text-gold-400 group-hover:text-gold-300 transition-colors">Fortunova</h1>
               <p class="text-xs text-gray-400 tracking-wider">AI 사주/명리 운세</p>
             </a>
-            <nav class="flex items-center gap-3 text-sm">
+            <nav aria-label="메인 내비게이션" class="flex items-center gap-3 text-sm">
               <a href="/login" class="text-gray-400 hover:text-gold-400 transition-colors">로그인</a>
             </nav>
           </div>
         </header>
 
-        <main class="max-w-md mx-auto p-4 relative z-10">
+        <main id="main-content" class="max-w-md mx-auto p-4 relative z-10">
           {children}
         </main>
 
