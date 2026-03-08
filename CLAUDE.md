@@ -8,7 +8,7 @@ AI 사주/명리 운세 시스템. SDD spec: `docs/specs/fortunova-system-archit
 - **서버**: Hono v4
 - **DB**: SQLite (better-sqlite3) + Drizzle ORM
 - **프론트엔드**: HTMX + Hono JSX + Tailwind CSS
-- **테스트**: Vitest
+- **테스트**: Vitest (단위/통합) + Playwright (E2E)
 - **LLM**: Claude CLI headless mode
 
 ## 컨벤션
@@ -21,12 +21,23 @@ AI 사주/명리 운세 시스템. SDD spec: `docs/specs/fortunova-system-archit
 ## 주요 명령어
 
 ```bash
-npm run dev        # 개발 서버 (tsx watch)
-npm run build      # TypeScript 빌드
-npm test           # 테스트 실행
-npm run lint       # ESLint
-npm run typecheck  # 타입 체크
+npm run dev              # 개발 서버 (tsx watch)
+npm run build            # TypeScript 빌드
+npm test                 # 단위/통합 테스트 (Vitest)
+npm run test:e2e         # E2E 테스트 - headless (NAS/CI)
+npm run test:e2e:fortune # E2E 운세 플로우만 (LLM 호출, ~40초)
+npm run lint             # ESLint
+npm run typecheck        # 타입 체크
 ```
+
+## E2E 테스트
+
+- **대상**: `https://fortunova.molidae.site` 실 서버
+- **설정**: `playwright.config.ts`, 테스트: `tests/e2e/`
+- **구성**: health(6) + auth(4) + fortune(3) + subscription(5) = 18개
+- 기능 변경 후 `npm run test:e2e`로 실 서버 동작 검증할 것
+- 운세 결과는 20개 항목 소프트 체크 (70% 이상 통과 필요)
+- `CI` 환경변수 유무로 headless/headed 자동 전환
 
 ## 디렉토리 구조
 
@@ -41,3 +52,4 @@ npm run typecheck  # 타입 체크
 - `src/views/` - JSX 템플릿
 - `src/db/` - Drizzle ORM 스키마
 - `tests/fixtures/known-saju-cases.ts` - 교차검증 사주 데이터
+- `tests/e2e/` - Playwright E2E 테스트
