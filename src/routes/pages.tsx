@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { AppEnv } from '@/types/hono.js';
 import { Layout } from '../views/layout.js';
 import { HomePage } from '../views/home.js';
 import { LoginPage } from '../views/login.js';
@@ -8,7 +9,7 @@ import { SubscribePage } from '../views/subscribe.js';
 import { getPlans, getUserSubscription } from '../services/subscription.js';
 import { getDatabase } from '../db/connection.js';
 
-const pages = new Hono();
+const pages = new Hono<AppEnv>();
 
 pages.get('/', (c) => {
   return c.html(
