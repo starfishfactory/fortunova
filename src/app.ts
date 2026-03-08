@@ -8,6 +8,7 @@ import fortunePartials from './routes/partials/fortune.js';
 import authPartials from './routes/partials/auth.js';
 import authApi from './routes/api/auth.js';
 import fortuneApi from './routes/api/fortune.js';
+import subscriptionApi from './routes/api/subscription.js';
 import { fortuneRegistry } from '@/fortune/registry.js';
 import { sajuSystem } from '@/fortune/systems/saju-system.js';
 
@@ -37,6 +38,7 @@ app.route('/partials', authPartials);
 app.use('/api/fortune', rateLimitMiddleware);
 app.route('/api', authApi);
 app.route('/api', fortuneApi);
+app.route('/api', subscriptionApi);
 
 // PWA static files
 app.get('/manifest.json', serveStatic({ path: './public/manifest.json' }));

@@ -2,6 +2,7 @@ import type { Context, Next } from 'hono';
 import { createHash } from 'crypto';
 import { getDatabase } from '@/db/connection.js';
 import { config } from '@/config.js';
+import { hasActiveSubscription } from '@/services/subscription.js';
 
 export function getRequestIdentifier(c: Context): { identifier: string; identifierType: 'user' | 'anonymous' } {
   const user = c.get('user') as { userId: number } | undefined;
@@ -25,6 +26,18 @@ export async function rateLimitMiddleware(c: Context, next: Next) {
   ).get(identifier, date) as { count: number } | undefined;
 
   const currentCount = usage?.count ?? 0;
+
+  // 구독자 우회: 활성 구독이 있으면 rate-limit 건너뜀
+  if (identifierType === 'user') {
+    const userId = parseInt(identifier.split(':')[1]);
+    if (hasActiveSubscription(userId)) {
+      c.set('identifier', identifier);
+      c.set('identifierType', identifierType);
+      c.set('isSubscriber', true);
+      await next();
+      return;
+    }
+  }
 
   if (currentCount >= config.dailyFreeLimit) {
     return c.json({

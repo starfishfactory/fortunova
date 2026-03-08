@@ -5,10 +5,16 @@ vi.mock('@/db/connection.js', () => ({
   getDatabase: vi.fn(),
 }));
 
+vi.mock('@/services/subscription.js', () => ({
+  hasActiveSubscription: vi.fn(),
+}));
+
 import { rateLimitMiddleware, getRequestIdentifier } from '@/middleware/rate-limit.js';
 import { getDatabase } from '@/db/connection.js';
+import { hasActiveSubscription } from '@/services/subscription.js';
 
 const mockGetDatabase = vi.mocked(getDatabase);
+const mockHasActiveSubscription = vi.mocked(hasActiveSubscription);
 
 function createMockDb() {
   const mockGet = vi.fn();
@@ -103,6 +109,49 @@ describe('rate-limit 미들웨어', () => {
       const res = await app.request('/test');
 
       expect(res.status).toBe(200);
+    });
+
+    it('구독자는 한도 초과해도 통과한다', async () => {
+      const mockDb = createMockDb();
+      mockDb._get.mockReturnValue({ count: 10 }); // way over limit
+      mockGetDatabase.mockReturnValue(mockDb as any);
+      mockHasActiveSubscription.mockReturnValue(true);
+
+      const app = new Hono();
+      app.use('*', async (c, next) => {
+        c.set('user', { userId: 42, email: 'test@test.com' });
+        await next();
+      });
+      app.use('*', rateLimitMiddleware);
+      app.get('/test', (c) => {
+        const isSubscriber = c.get('isSubscriber');
+        return c.json({ ok: true, isSubscriber });
+      });
+
+      const res = await app.request('/test');
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.isSubscriber).toBe(true);
+    });
+
+    it('비구독 사용자는 한도 초과 시 429를 반환한다', async () => {
+      const mockDb = createMockDb();
+      mockDb._get.mockReturnValue({ count: 3 });
+      mockGetDatabase.mockReturnValue(mockDb as any);
+      mockHasActiveSubscription.mockReturnValue(false);
+
+      const app = new Hono();
+      app.use('*', async (c, next) => {
+        c.set('user', { userId: 42, email: 'test@test.com' });
+        await next();
+      });
+      app.use('*', rateLimitMiddleware);
+      app.get('/test', (c) => c.json({ ok: true }));
+
+      const res = await app.request('/test');
+
+      expect(res.status).toBe(429);
     });
 
     it('identifier와 identifierType을 context에 설정한다', async () => {
