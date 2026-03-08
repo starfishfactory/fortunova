@@ -31,3 +31,12 @@ export interface GanJi {
  * 상극(相剋) 관계 - 목→토→수→화→금→목
  */
 export type ElementRelation = '상생' | '상극' | '비화' | '무관';
+
+/**
+ * 장간(藏干) - 지지 속에 숨어있는 천간
+ */
+export interface HiddenStem {
+  main: HeavenlyStem;       // 본기
+  middle?: HeavenlyStem;    // 중기
+  residual?: HeavenlyStem;  // 여기
+}

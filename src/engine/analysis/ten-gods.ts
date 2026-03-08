@@ -1,7 +1,7 @@
 import type { HeavenlyStem, FiveElement, FourPillars } from '../types/index.js';
 import type { TenGod } from '../types/analysis.js';
 import { getStemElement, getStemYinYang } from '../core/heavenly-stems.js';
-import { getBranchElement, getBranchYinYang } from '../core/earthly-branches.js';
+import { getHiddenStems } from '../core/earthly-branches.js';
 import { getElementRelation } from '../core/five-elements.js';
 
 /**
@@ -28,7 +28,10 @@ export function getTenGod(dayStem: HeavenlyStem, targetStem: HeavenlyStem): TenG
 /**
  * 사주팔자의 각 위치(년간, 월간, 시간, 년지, 월지, 일지, 시지)에 대한 십신을 매핑한다.
  * 일간(dayStem) 자체는 매핑에 포함하지 않는다.
- * 지지는 본기 오행만 사용한다 (Phase 2 단순화).
+ * 지지는 장간(藏干)의 본기/중기/여기를 모두 매핑한다.
+ * - 본기: yearBranch, monthBranch, dayBranch, hourBranch
+ * - 중기: yearBranch_middle, monthBranch_middle, ... (존재하는 경우만)
+ * - 여기: yearBranch_residual, monthBranch_residual, ... (존재하는 경우만)
  */
 export function mapFourPillarsTenGods(fourPillars: FourPillars): Record<string, TenGod> {
   const dayStem = fourPillars.day.stem;
@@ -39,10 +42,7 @@ export function mapFourPillarsTenGods(fourPillars: FourPillars): Record<string, 
   result['monthStem'] = getTenGod(dayStem, fourPillars.month.stem);
   result['hourStem'] = getTenGod(dayStem, fourPillars.hour.stem);
 
-  // 지지 매핑 (본기 오행 + 음양 기준)
-  const dayElement = getStemElement(dayStem);
-  const dayYinYang = getStemYinYang(dayStem);
-
+  // 지지 매핑 (장간 기반)
   const branches = [
     { key: 'yearBranch', branch: fourPillars.year.branch },
     { key: 'monthBranch', branch: fourPillars.month.branch },
@@ -51,10 +51,20 @@ export function mapFourPillarsTenGods(fourPillars: FourPillars): Record<string, 
   ];
 
   for (const { key, branch } of branches) {
-    const branchElement = getBranchElement(branch);
-    const branchYinYang = getBranchYinYang(branch);
-    const samePolarity = dayYinYang === branchYinYang;
-    result[key] = determineTenGod(dayElement, branchElement, samePolarity);
+    const hidden = getHiddenStems(branch);
+
+    // 본기
+    result[key] = getTenGod(dayStem, hidden.main);
+
+    // 중기 (존재하는 경우만)
+    if (hidden.middle) {
+      result[`${key}_middle`] = getTenGod(dayStem, hidden.middle);
+    }
+
+    // 여기 (존재하는 경우만)
+    if (hidden.residual) {
+      result[`${key}_residual`] = getTenGod(dayStem, hidden.residual);
+    }
   }
 
   return result;

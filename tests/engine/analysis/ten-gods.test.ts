@@ -146,14 +146,67 @@ describe('ten-gods (십신)', () => {
 
       const result = mapFourPillarsTenGods(fourPillars);
 
-      // 년지 자(수/양) → 편인
-      expect(result['yearBranch']).toBe('편인');
-      // 월지 인(목/양) → 비견
+      // 년지 자(수/양) → 본기 계(수/음) → 정인
+      expect(result['yearBranch']).toBe('정인');
+      // 월지 인(목/양) → 본기 갑(목/양) → 비견
       expect(result['monthBranch']).toBe('비견');
-      // 일지 오(화/양) → 식신
-      expect(result['dayBranch']).toBe('식신');
-      // 시지 유(금/음) → 정관
+      // 일지 오(화/양) → 본기 정(화/음) → 상관
+      expect(result['dayBranch']).toBe('상관');
+      // 시지 유(금/음) → 본기 신(금/음) → 정관
       expect(result['hourBranch']).toBe('정관');
+    });
+
+    it('중기/여기가 있는 지지는 _middle, _residual 키를 포함한다', () => {
+      // 일간 갑(목/양)
+      // 축: 기(토/음) 본기, 신(금/음) 중기, 계(수/음) 여기
+      // 인: 갑(목/양) 본기, 병(화/양) 중기, 무(토/양) 여기
+      const fourPillars: FourPillars = {
+        year: { stem: '갑', branch: '축' },
+        month: { stem: '병', branch: '인' },
+        day: { stem: '갑', branch: '오' },
+        hour: { stem: '무', branch: '해' },
+      };
+
+      const result = mapFourPillarsTenGods(fourPillars);
+
+      // 년지 축: 본기 기(토/음)→정재, 중기 신(금/음)→정관, 여기 계(수/음)→정인
+      expect(result['yearBranch']).toBe('정재');
+      expect(result['yearBranch_middle']).toBe('정관');
+      expect(result['yearBranch_residual']).toBe('정인');
+
+      // 월지 인: 본기 갑(목/양)→비견, 중기 병(화/양)→식신, 여기 무(토/양)→편재
+      expect(result['monthBranch']).toBe('비견');
+      expect(result['monthBranch_middle']).toBe('식신');
+      expect(result['monthBranch_residual']).toBe('편재');
+
+      // 일지 오: 본기 정(화/음)→상관, 중기 기(토/음)→정재, 여기 없음
+      expect(result['dayBranch']).toBe('상관');
+      expect(result['dayBranch_middle']).toBe('정재');
+      expect(result['dayBranch_residual']).toBeUndefined();
+
+      // 시지 해: 본기 임(수/양)→편인, 중기 갑(목/양)→비견, 여기 없음
+      expect(result['hourBranch']).toBe('편인');
+      expect(result['hourBranch_middle']).toBe('비견');
+      expect(result['hourBranch_residual']).toBeUndefined();
+    });
+
+    it('장간이 본기만 있는 지지는 _middle, _residual 키가 없다', () => {
+      // 자: 계(본기만), 묘: 을(본기만), 유: 신(본기만)
+      const fourPillars: FourPillars = {
+        year: { stem: '갑', branch: '자' },
+        month: { stem: '병', branch: '묘' },
+        day: { stem: '갑', branch: '유' },
+        hour: { stem: '무', branch: '자' },
+      };
+
+      const result = mapFourPillarsTenGods(fourPillars);
+
+      expect(result['yearBranch_middle']).toBeUndefined();
+      expect(result['yearBranch_residual']).toBeUndefined();
+      expect(result['monthBranch_middle']).toBeUndefined();
+      expect(result['monthBranch_residual']).toBeUndefined();
+      expect(result['dayBranch_middle']).toBeUndefined();
+      expect(result['dayBranch_residual']).toBeUndefined();
     });
   });
 });

@@ -7,8 +7,10 @@ import {
   getBranchByIndex,
   getBranchHour,
   getHourBranch,
+  HIDDEN_STEMS_MAP,
+  getHiddenStems,
 } from '@/engine/core/earthly-branches.js';
-import type { EarthlyBranch, FiveElement } from '@/engine/types/index.js';
+import type { EarthlyBranch, FiveElement, HiddenStem } from '@/engine/types/index.js';
 
 describe('earthly-branches (지지)', () => {
   describe('EARTHLY_BRANCHES', () => {
@@ -96,6 +98,73 @@ describe('earthly-branches (지지)', () => {
 
     it.each(cases)('%s시의 시간 범위는 %s이다', (branch, expected) => {
       expect(getBranchHour(branch)).toEqual(expected);
+    });
+  });
+
+  describe('HIDDEN_STEMS_MAP', () => {
+    it('12지지 모두에 대해 장간 매핑이 존재한다', () => {
+      const branches: EarthlyBranch[] = [
+        '자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해',
+      ];
+      for (const branch of branches) {
+        expect(HIDDEN_STEMS_MAP[branch]).toBeDefined();
+      }
+    });
+
+    it('자(子)의 장간은 계(본기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['자']).toEqual({ main: '계' });
+    });
+
+    it('축(丑)의 장간은 기(본기)/신(중기)/계(여기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['축']).toEqual({ main: '기', middle: '신', residual: '계' });
+    });
+
+    it('인(寅)의 장간은 갑(본기)/병(중기)/무(여기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['인']).toEqual({ main: '갑', middle: '병', residual: '무' });
+    });
+
+    it('묘(卯)의 장간은 을(본기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['묘']).toEqual({ main: '을' });
+    });
+
+    it('진(辰)의 장간은 무(본기)/을(중기)/계(여기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['진']).toEqual({ main: '무', middle: '을', residual: '계' });
+    });
+
+    it('사(巳)의 장간은 병(본기)/무(중기)/경(여기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['사']).toEqual({ main: '병', middle: '무', residual: '경' });
+    });
+
+    it('오(午)의 장간은 정(본기)/기(중기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['오']).toEqual({ main: '정', middle: '기' });
+    });
+
+    it('미(未)의 장간은 기(본기)/정(중기)/을(여기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['미']).toEqual({ main: '기', middle: '정', residual: '을' });
+    });
+
+    it('신(申)의 장간은 경(본기)/임(중기)/무(여기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['신']).toEqual({ main: '경', middle: '임', residual: '무' });
+    });
+
+    it('유(酉)의 장간은 신(본기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['유']).toEqual({ main: '신' });
+    });
+
+    it('술(戌)의 장간은 무(본기)/신(중기)/정(여기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['술']).toEqual({ main: '무', middle: '신', residual: '정' });
+    });
+
+    it('해(亥)의 장간은 임(본기)/갑(중기)이다', () => {
+      expect(HIDDEN_STEMS_MAP['해']).toEqual({ main: '임', middle: '갑' });
+    });
+  });
+
+  describe('getHiddenStems', () => {
+    it('지지를 입력하면 해당 장간을 반환한다', () => {
+      expect(getHiddenStems('자')).toEqual({ main: '계' });
+      expect(getHiddenStems('축')).toEqual({ main: '기', middle: '신', residual: '계' });
+      expect(getHiddenStems('인')).toEqual({ main: '갑', middle: '병', residual: '무' });
     });
   });
 
