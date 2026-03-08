@@ -207,6 +207,12 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
       if (step) { step.className = 'sse-step'; }
       if (status) { status.textContent = ''; }
     });
+    ['critique','retry'].forEach(function(id) {
+      var step = document.getElementById('step-'+id);
+      var status = document.getElementById('step-'+id+'-status');
+      if (step) { step.style.display = 'none'; step.className = 'sse-step'; }
+      if (status) { status.textContent = ''; }
+    });
   }
   function setStepActive(chunk) {
     var step = document.getElementById('step-'+chunk);
@@ -249,6 +255,16 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
           } else {
             setStepDone(d.chunk, d.elapsed);
           }
+        } else if (d.type === 'critique') {
+          var cs = document.getElementById('step-critique');
+          if (cs) { cs.style.display = ''; cs.className = 'sse-step done'; }
+          var css = document.getElementById('step-critique-status');
+          if (css) css.textContent = d.score + '/10 (' + (d.elapsed/1000).toFixed(1) + 's)';
+        } else if (d.type === 'retry') {
+          var rs = document.getElementById('step-retry');
+          if (rs) { rs.style.display = ''; rs.className = 'sse-step done'; }
+          var rss = document.getElementById('step-retry-status');
+          if (rss) rss.textContent = (d.elapsed/1000).toFixed(1) + 's';
         } else if (d.type === 'done' || d.type === 'error') {
           es.close();
           // SSE 완료 → POST로 결과 HTML 가져오기 (서버 캐시 히트)

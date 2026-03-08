@@ -18,6 +18,66 @@ const CATEGORY_LABELS: Record<FortuneCategory, string> = {
   wealth: '재물운',
 };
 
+/**
+ * 카테고리별 특화 프롬프트 지침
+ * 각 카테고리에 맞는 사주 관점과 초점을 명시한다.
+ */
+const CATEGORY_SPECIFIC_INSTRUCTIONS: Record<FortuneCategory, string> = {
+  daily: [
+    `## 카테고리 특화 지침 (오늘의 운세)`,
+    `- 시간대별 에너지 흐름(寅時~亥時)에 따른 기운 변화를 설명하세요`,
+    `- 오행의 전반적 균형이 하루 전체 운세에 미치는 영향을 분석하세요`,
+    `- 일간의 특성을 "OO 일간인 당신은..." 형태로 반드시 언급하세요`,
+    `- 세운/대운의 흐름이 오늘 하루에 어떤 영향을 주는지 연결하세요`,
+  ].join('\n'),
+  love: [
+    `## 카테고리 특화 지침 (애정운)`,
+    `- 일간의 성격 특성이 연애/관계에서 어떻게 발현되는지 구체적으로 설명하세요`,
+    `- 오행 균형에서 火(열정), 水(감성), 木(성장)이 애정에 미치는 영향을 분석하세요`,
+    `- 십신 중 정재/편재(남성 배우자운), 정관/편관(여성 배우자운)의 영향을 해석하세요`,
+    `- 신살 중 도화살, 홍염살 등 연애 관련 신살이 있다면 반드시 언급하세요`,
+    `- "OO 일간의 당신은 관계에서..." 형태로 시작하세요`,
+  ].join('\n'),
+  career: [
+    `## 카테고리 특화 지침 (직장/사업운)`,
+    `- 십신 분석을 통해 리더십 스타일(비겁=독립형, 식상=창의형, 재성=실리형, 관성=조직형, 인성=학구형)을 설명하세요`,
+    `- 오행 균형에서 金(결단력), 木(추진력), 土(안정성)가 직장운에 미치는 영향을 분석하세요`,
+    `- 세운의 십신이 직장/사업 기회에 미치는 영향을 구체적으로 해석하세요`,
+    `- 대운 흐름에서 현재가 커리어 상승기/전환기/안정기인지 판단하세요`,
+    `- "OO 일간인 당신의 직장에서의 강점은..." 형태로 시작하세요`,
+  ].join('\n'),
+  health: [
+    `## 카테고리 특화 지침 (건강운)`,
+    `- 오행 불균형으로 취약한 신체 부위를 구체적으로 지적하세요 (木=간/눈, 火=심장/소장, 土=위장/비장, 金=폐/대장, 水=신장/방광)`,
+    `- 일간의 강약에 따른 에너지 관리 방법을 제안하세요 (신강=과로 주의, 신약=체력 보강)`,
+    `- 오행 비율에서 가장 부족한 오행과 과다한 오행이 건강에 미치는 영향을 분석하세요`,
+    `- 계절과 오행의 관계에서 현재 시기에 특히 주의할 건강 사항을 언급하세요`,
+    `- "OO 일간이며 OO이(가) 부족한 당신은..." 형태로 시작하세요`,
+  ].join('\n'),
+  wealth: [
+    `## 카테고리 특화 지침 (재물운)`,
+    `- 십신에서 정재(안정 수입)/편재(투자·사업 수입)의 위치와 강약을 분석하세요`,
+    `- 일간의 강약이 재물 관리 성향에 미치는 영향을 설명하세요 (신강=적극 투자, 신약=보수적 관리)`,
+    `- 세운의 재성/비겁/식상이 올해 재물 흐름에 미치는 영향을 구체적으로 해석하세요`,
+    `- 오행 균형에서 金(재물 보존), 水(재물 유동), 土(재물 축적)의 관계를 분석하세요`,
+    `- "OO 일간의 당신은 재물 관리에서..." 형태로 시작하세요`,
+  ].join('\n'),
+};
+
+/**
+ * 사주 특성 참조 필수 지침 (모든 카테고리 공통)
+ */
+const SAJU_REFERENCING_MANDATE = [
+  ``,
+  `## 필수 참조 규칙 (반드시 준수)`,
+  `1. 반드시 일간(天干)을 "OO 일간인 당신은..." 형태로 첫 문단에 언급하세요`,
+  `2. 오행 비율에서 가장 강한 오행과 가장 약한 오행을 구체적 수치와 함께 언급하세요 (예: "화 기운이 32.5%로 가장 강한 당신에게...")`,
+  `3. 신살이 있다면 최소 1개 이상 운세 해석에 반영하세요 (예: "역마살의 영향으로 이동/변화의 기운이...")`,
+  `4. 세운(올해 운)의 십신과 지지 상호작용을 반드시 해석에 포함하세요`,
+  `5. 일반적인 점술이 아닌, 이 사람의 사주 데이터에 기반한 개인화된 해석을 하세요`,
+  `6. 다른 사주를 가진 사람에게는 완전히 다른 내용이 나와야 합니다`,
+].join('\n');
+
 export type ChunkType = 'core' | 'sub' | 'meta';
 
 function buildSajuHeader(analysis: SystemAnalysis, category: FortuneCategory): string {
@@ -137,11 +197,107 @@ const CHUNK_PROMPTS: Record<ChunkType, string> = {
 
 export function buildChunkPrompts(analysis: SystemAnalysis, category: FortuneCategory): Record<ChunkType, string> {
   const header = buildSajuHeader(analysis, category);
+  const categoryInstr = CATEGORY_SPECIFIC_INSTRUCTIONS[category];
+  const mandate = SAJU_REFERENCING_MANDATE;
   return {
-    core: header + '\n\n' + CHUNK_PROMPTS.core,
-    sub: header + '\n\n' + CHUNK_PROMPTS.sub,
-    meta: header + '\n\n' + CHUNK_PROMPTS.meta,
+    core: header + '\n\n' + categoryInstr + mandate + '\n\n' + CHUNK_PROMPTS.core,
+    sub: header + '\n\n' + categoryInstr + mandate + '\n\n' + CHUNK_PROMPTS.sub,
+    meta: header + '\n\n' + categoryInstr + mandate + '\n\n' + CHUNK_PROMPTS.meta,
   };
+}
+
+/**
+ * 생성된 운세 결과에 대한 비평 프롬프트를 생성한다.
+ */
+export function buildCritiquePrompt(
+  analysis: SystemAnalysis,
+  category: FortuneCategory,
+  generatedCore: string,
+): string {
+  const data = analysis.data as unknown as SajuAnalysis & { birthYear?: number; gender?: string };
+  const { fourPillars, elementBalance, dayMasterStrength, sinsal, annualFortune } = data;
+
+  const dayMaster = fourPillars.day.stem;
+  const sinsalNames = sinsal?.map(s => s.name).join(', ') || '없음';
+
+  // 오행 중 최강/최약
+  const sorted = Object.entries(elementBalance).sort(([, a], [, b]) => b - a);
+  const strongest = `${sorted[0][0]}(${(sorted[0][1] * 100).toFixed(1)}%)`;
+  const weakest = `${sorted[sorted.length - 1][0]}(${(sorted[sorted.length - 1][1] * 100).toFixed(1)}%)`;
+
+  const annualTenGod = annualFortune?.tenGod ?? '없음';
+
+  return [
+    `아래 운세 결과의 품질을 평가하세요. 순수 JSON만 반환하세요.`,
+    ``,
+    `## 이 사람의 사주 핵심`,
+    `- 일간: ${dayMaster} (${dayMasterStrength})`,
+    `- 최강 오행: ${strongest}, 최약 오행: ${weakest}`,
+    `- 신살: ${sinsalNames}`,
+    `- 세운 십신: ${annualTenGod}`,
+    `- 카테고리: ${CATEGORY_LABELS[category]}`,
+    ``,
+    `## 생성된 운세 (core 청크)`,
+    generatedCore.slice(0, 1500),
+    ``,
+    `## 평가 기준`,
+    `1. 일간 "${dayMaster}"이(가) 명시적으로 언급되었는가?`,
+    `2. 오행 비율(${strongest}, ${weakest})이 구체적으로 참조되었는가?`,
+    `3. 신살(${sinsalNames})이 해석에 반영되었는가?`,
+    `4. 카테고리(${CATEGORY_LABELS[category]})에 맞는 초점인가?`,
+    `5. 다른 사주의 사람과 구별되는 개인화된 내용인가?`,
+    ``,
+    `{ "score": 1~10, "feedback": "구체적 개선 피드백 (2~3문장)" }`,
+  ].join('\n');
+}
+
+/**
+ * 비평 결과를 파싱한다.
+ */
+export function parseCritiqueResult(response: string): {
+  score: number;
+  feedback: string;
+  shouldRegenerate: boolean;
+} {
+  try {
+    let jsonStr = response.trim();
+    const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1].trim();
+    }
+    const parsed = JSON.parse(jsonStr);
+    const score = typeof parsed.score === 'number' ? parsed.score : 5;
+    const feedback = parsed.feedback ?? '';
+    return { score, feedback, shouldRegenerate: score < 7 };
+  } catch {
+    // 파싱 실패 시 재생성하지 않음
+    return { score: 7, feedback: '', shouldRegenerate: false };
+  }
+}
+
+/**
+ * 비평 피드백을 반영한 강화된 core 프롬프트를 생성한다.
+ */
+export function buildEnhancedCorePrompt(
+  analysis: SystemAnalysis,
+  category: FortuneCategory,
+  feedback: string,
+): string {
+  const header = buildSajuHeader(analysis, category);
+  const categoryInstr = CATEGORY_SPECIFIC_INSTRUCTIONS[category];
+  const mandate = SAJU_REFERENCING_MANDATE;
+  return [
+    header,
+    '',
+    categoryInstr,
+    mandate,
+    '',
+    `## 이전 결과 피드백 (반드시 반영)`,
+    `이전 생성 결과가 품질 기준 미달이었습니다. 다음 피드백을 반영하여 더 구체적으로 작성하세요:`,
+    feedback,
+    '',
+    CHUNK_PROMPTS.core,
+  ].join('\n');
 }
 
 function parseChunkJson(llmResponse: string): Record<string, unknown> {

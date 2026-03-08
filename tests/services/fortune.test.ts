@@ -42,6 +42,9 @@ vi.mock('@/fortune/systems/saju-system.js', () => ({
     meta: 'meta prompt',
   }),
   mergeChunkResults: vi.fn(),
+  buildCritiquePrompt: vi.fn().mockReturnValue('critique prompt'),
+  parseCritiqueResult: vi.fn().mockReturnValue({ score: 8, feedback: '', shouldRegenerate: false }),
+  buildEnhancedCorePrompt: vi.fn().mockReturnValue('enhanced core prompt'),
   sajuSystem: {
     id: 'saju',
     name: '사주/명리',
@@ -158,15 +161,20 @@ describe('getFortune', () => {
     mockGetDatabase.mockReturnValue(mockDb as any);
 
     const llmResponse = JSON.stringify(mockFortuneResult);
-    mockCallClaude.mockResolvedValue(llmResponse);
+    const critiqueResponse = JSON.stringify({ score: 8, feedback: 'good' });
+    mockCallClaude
+      .mockResolvedValueOnce(llmResponse)  // core chunk
+      .mockResolvedValueOnce(llmResponse)  // sub chunk
+      .mockResolvedValueOnce(llmResponse)  // meta chunk
+      .mockResolvedValueOnce(critiqueResponse); // critique (score >= 7 → no retry)
 
     const result = await getFortune(mockInput, 'daily', 'saju', 'anon:abc123', 'anonymous');
 
     expect(result.cached).toBe(false);
     expect(result.fortune).toEqual(mockFortuneResult);
     expect(mockFortuneSystem.analyze).toHaveBeenCalled();
-    // 3청크 병렬 호출
-    expect(mockCallClaude).toHaveBeenCalledTimes(3);
+    // 3청크 병렬 + 1 비평 = 4회 호출
+    expect(mockCallClaude).toHaveBeenCalledTimes(4);
     expect(mockMergeChunkResults).toHaveBeenCalled();
   });
 
@@ -178,7 +186,13 @@ describe('getFortune', () => {
     mockGetDatabase.mockReturnValue(mockDb as any);
 
     const llmResponse = JSON.stringify(mockFortuneResult);
+    const critiqueResponse = JSON.stringify({ score: 9, feedback: '' });
     mockCallClaude.mockResolvedValue(llmResponse);
+    // 4번째 호출(비평)만 비평 응답 반환
+    mockCallClaude.mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(critiqueResponse);
 
     await getFortune(mockInput, 'daily', 'saju', 'user:1', 'user');
 
@@ -200,7 +214,12 @@ describe('getFortune', () => {
     mockGetDatabase.mockReturnValue(mockDb as any);
 
     const llmResponse = JSON.stringify(mockFortuneResult);
-    mockCallClaude.mockResolvedValue(llmResponse);
+    const critiqueResponse = JSON.stringify({ score: 8, feedback: '' });
+    mockCallClaude
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(critiqueResponse);
 
     const result = await getFortune(mockInput, 'daily', 'saju', 'anon:xyz', 'anonymous');
 
@@ -216,7 +235,12 @@ describe('getFortune', () => {
     mockGetDatabase.mockReturnValue(mockDb as any);
 
     const llmResponse = JSON.stringify(mockFortuneResult);
-    mockCallClaude.mockResolvedValue(llmResponse);
+    const critiqueResponse = JSON.stringify({ score: 8, feedback: '' });
+    mockCallClaude
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(llmResponse)
+      .mockResolvedValueOnce(critiqueResponse);
 
     await getFortune(mockInput, 'daily', 'saju', 'user:42', 'user');
 

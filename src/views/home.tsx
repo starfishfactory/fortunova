@@ -148,6 +148,16 @@ export function HomePage() {
               <div class="sse-step-label">행운 정보 생성</div>
               <div class="sse-step-status" id="step-meta-status"></div>
             </div>
+            <div class="sse-step" id="step-critique" style="display:none">
+              <div class="sse-step-icon">🔍</div>
+              <div class="sse-step-label">품질 검증</div>
+              <div class="sse-step-status" id="step-critique-status"></div>
+            </div>
+            <div class="sse-step" id="step-retry" style="display:none">
+              <div class="sse-step-icon">✨</div>
+              <div class="sse-step-label">결과 개선</div>
+              <div class="sse-step-status" id="step-retry-status"></div>
+            </div>
           </div>
           <p id="loading-tip" class="text-sm text-gray-400 transition-opacity duration-500 mt-4"></p>
         </div>

@@ -54,6 +54,10 @@ fortunePartials.get('/fortune-stream', async (c) => {
               await stream.writeSSE({ data: JSON.stringify({ type: 'progress', chunk: event.chunk, elapsed: event.elapsed }) });
             } else if (event.type === 'cached') {
               await stream.writeSSE({ data: JSON.stringify({ type: 'progress', chunk: 'cached', elapsed: 0 }) });
+            } else if (event.type === 'critique') {
+              await stream.writeSSE({ data: JSON.stringify({ type: 'critique', score: event.score, elapsed: event.elapsed }) });
+            } else if (event.type === 'retry') {
+              await stream.writeSSE({ data: JSON.stringify({ type: 'retry', elapsed: event.elapsed }) });
             } else if (event.type === 'done') {
               // HTML은 SSE로 보내지 않고, 완료 신호만 전송
               await stream.writeSSE({ data: JSON.stringify({ type: 'done' }) });

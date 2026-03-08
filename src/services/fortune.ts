@@ -4,7 +4,7 @@ import { fortuneRegistry } from '@/fortune/registry.js';
 import { callClaude } from '@/services/llm.js';
 import { getDatabase } from '@/db/connection.js';
 import { config } from '@/config.js';
-import { buildChunkPrompts, mergeChunkResults } from '@/fortune/systems/saju-system.js';
+import { buildChunkPrompts, mergeChunkResults, buildCritiquePrompt, parseCritiqueResult, buildEnhancedCorePrompt } from '@/fortune/systems/saju-system.js';
 import type { ChunkType } from '@/fortune/systems/saju-system.js';
 
 export interface GetFortuneResult {
@@ -38,6 +38,13 @@ export type ChunkProgressEvent = {
   elapsed: number;
 } | {
   type: 'cached';
+} | {
+  type: 'critique';
+  score: number;
+  elapsed: number;
+} | {
+  type: 'retry';
+  elapsed: number;
 } | {
   type: 'done';
   result: GetFortuneResult;
@@ -112,6 +119,31 @@ export async function getFortuneStream(
     if (!coreResult?.response) {
       onEvent({ type: 'error', message: 'LLM_UNAVAILABLE' });
       return;
+    }
+
+    // Generator-Critique loop: core 청크 품질 평가 및 조건부 재생성
+    let finalCoreResponse = coreResult.response;
+    try {
+      const critiquePrompt = buildCritiquePrompt(analysis, category, finalCoreResponse);
+      const critiqueResponse = await callClaude(critiquePrompt);
+      const critique = parseCritiqueResult(critiqueResponse);
+      onEvent({ type: 'critique', score: critique.score, elapsed: Date.now() - startTime });
+
+      if (critique.shouldRegenerate) {
+        console.warn(`[fortune-stream] critique score ${critique.score}/10 → regenerating core`);
+        const enhancedPrompt = buildEnhancedCorePrompt(analysis, category, critique.feedback);
+        const enhancedCore = await callClaude(enhancedPrompt);
+        if (enhancedCore) {
+          finalCoreResponse = enhancedCore;
+          // 청크 결과 업데이트
+          const idx = chunkResults.findIndex((r) => r.type === 'core');
+          if (idx >= 0) chunkResults[idx] = { type: 'core', response: enhancedCore };
+        }
+        onEvent({ type: 'retry', elapsed: Date.now() - startTime });
+      }
+    } catch (critiqueErr) {
+      console.error('[fortune-stream] critique/retry failed:', (critiqueErr as Error).message);
+      // 비평 실패 시 원본 결과 그대로 사용
     }
 
     const fortune = mergeChunkResults(
@@ -222,6 +254,24 @@ export async function getFortune(
   // core 실패 시 전체 에러
   if (!chunks[0].response) {
     throw new Error('LLM_UNAVAILABLE');
+  }
+
+  // Generator-Critique loop: core 청크 품질 평가 및 조건부 재생성
+  try {
+    const critiquePrompt = buildCritiquePrompt(analysis, category, chunks[0].response!);
+    const critiqueResponse = await callClaude(critiquePrompt);
+    const critique = parseCritiqueResult(critiqueResponse);
+
+    if (critique.shouldRegenerate) {
+      console.warn(`[fortune] critique score ${critique.score}/10 → regenerating core`);
+      const enhancedPrompt = buildEnhancedCorePrompt(analysis, category, critique.feedback);
+      const enhancedCore = await callClaude(enhancedPrompt);
+      if (enhancedCore) {
+        chunks[0] = { type: 'core', response: enhancedCore };
+      }
+    }
+  } catch (critiqueErr) {
+    console.error('[fortune] critique/retry failed:', (critiqueErr as Error).message);
   }
 
   const fortune = mergeChunkResults(chunks);
