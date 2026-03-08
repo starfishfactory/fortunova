@@ -5,6 +5,7 @@ export type {
   YinYang,
   GanJi,
   ElementRelation,
+  HiddenStem,
 } from './stems-branches.js';
 
 export type {
