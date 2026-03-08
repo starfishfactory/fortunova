@@ -25,4 +25,7 @@ export type {
   DayMasterStrength,
   MajorFatePeriod,
   SajuAnalysis,
+  BranchInteraction,
+  BranchInteractionResult,
+  AnnualFortune,
 } from './analysis.js';

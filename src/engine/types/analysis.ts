@@ -1,4 +1,4 @@
-import type { FiveElement, GanJi } from './stems-branches.js';
+import type { FiveElement, GanJi, EarthlyBranch } from './stems-branches.js';
 import type { FourPillars } from './four-pillars.js';
 
 /**
@@ -29,6 +29,41 @@ export interface MajorFatePeriod {
 }
 
 /**
+ * 지지 상호작용 타입
+ */
+export type BranchInteraction = '충' | '합' | '형';
+
+/**
+ * 지지 상호작용 결과
+ */
+export interface BranchInteractionResult {
+  /** 원국 위치 */
+  position: string;
+  /** 상호작용 유형 */
+  type: BranchInteraction;
+  /** [세운지지, 원국지지] */
+  branches: [EarthlyBranch, EarthlyBranch];
+}
+
+/**
+ * 세운(歲運) 분석 결과
+ */
+export interface AnnualFortune {
+  /** 대상 연도 */
+  year: number;
+  /** 해당 연도 간지 */
+  ganJi: GanJi;
+  /** 세운 천간 vs 일간 십신 */
+  tenGod: TenGod;
+  /** 세운 지지 본기 vs 일간 십신 */
+  branchTenGod: TenGod;
+  /** 세운 지지 vs 원국 지지 상호작용 */
+  interactions: BranchInteractionResult[];
+  /** 해당 연도의 대운 */
+  currentMajorFate?: MajorFatePeriod;
+}
+
+/**
  * 사주 분석 결과
  */
 export interface SajuAnalysis {
@@ -44,4 +79,6 @@ export interface SajuAnalysis {
   usefulGod: FiveElement;
   /** 대운 */
   majorFate: MajorFatePeriod[];
+  /** 세운 */
+  annualFortune?: AnnualFortune;
 }
