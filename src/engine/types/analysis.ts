@@ -2,6 +2,23 @@ import type { FiveElement, GanJi } from './stems-branches.js';
 import type { FourPillars } from './four-pillars.js';
 
 /**
+ * 신살(神煞) 이름 - 6종
+ */
+export type SinsalName = '도화살' | '역마살' | '천을귀인' | '화개살' | '양인살' | '공망';
+
+/**
+ * 신살 분석 결과
+ */
+export interface SinsalResult {
+  /** 신살 이름 */
+  name: SinsalName;
+  /** 어느 주에서 발견되었는지 (예: '년지', '월지', '시지') */
+  position: string;
+  /** 간단한 의미 설명 */
+  description: string;
+}
+
+/**
  * 십신(十神) - 일간 기준 관계
  */
 export type TenGod =
@@ -44,4 +61,6 @@ export interface SajuAnalysis {
   usefulGod: FiveElement;
   /** 대운 */
   majorFate: MajorFatePeriod[];
+  /** 신살 */
+  sinsal?: SinsalResult[];
 }
