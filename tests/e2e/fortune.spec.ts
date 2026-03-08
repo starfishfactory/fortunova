@@ -31,18 +31,12 @@ test.describe('운세 조회 플로우', () => {
     await page.check('input[name="gender"][value="M"]');
     await page.selectOption('select[name="category"]', 'daily');
 
-    // 제출 (SSE 방식)
+    // 제출 (SSE 방식 또는 localStorage 캐시 히트)
     await page.click('button[type="submit"]');
 
-    // 로딩 UI 표시 확인
-    await expect(page.locator('#loading')).toBeVisible({ timeout: 5_000 });
-
-    // 결과 대기 (LLM 응답 → SSE done → POST fortune-result)
+    // 결과 대기 (캐시 히트 시 즉시, SSE 시 최대 150초)
     const result = page.locator('#result');
     await expect(result.locator('div').first()).toBeVisible({ timeout: 150_000 });
-
-    // 로딩 UI 사라짐 확인
-    await expect(page.locator('#loading')).toBeHidden();
 
     // 에러 응답 아닌지 확인
     const html = await result.innerHTML();
