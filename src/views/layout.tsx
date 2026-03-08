@@ -1,6 +1,14 @@
 const BUILD_TS = Date.now().toString();
 
-export function Layout({ children, title }: { children: any; title?: string }) {
+export interface LayoutProps {
+  children: any;
+  title?: string;
+  user?: { email: string };
+  remainingCount?: number;
+  isSubscriber?: boolean;
+}
+
+export function Layout({ children, title, user, remainingCount, isSubscriber }: LayoutProps) {
   return (
     <html lang="ko">
       <head>
@@ -49,13 +57,32 @@ export function Layout({ children, title }: { children: any; title?: string }) {
         <div class="stars-container" id="stars"></div>
 
         <header class="glass-card sticky top-0 z-50" style="border-radius: 0; border-left: none; border-right: none; border-top: none;">
-          <div class="max-w-md mx-auto flex items-center justify-between p-4">
-            <a href="/" class="block group">
-              <h1 class="text-xl font-serif font-bold text-gold-400 group-hover:text-gold-300 transition-colors">Fortunova</h1>
-              <p class="text-xs text-gray-400 tracking-wider">AI 사주/명리 운세</p>
+          <div class="max-w-md mx-auto flex items-center justify-between p-3 px-4">
+            <a href="/" class="flex items-center gap-2 group">
+              <img src="/public/favicon.svg" alt="" width="28" height="28" class="group-hover:opacity-80 transition-opacity" />
+              <div>
+                <h1 class="text-lg font-serif font-bold text-gold-400 leading-tight group-hover:text-gold-300 transition-colors">Fortunova</h1>
+                <p class="text-[10px] text-gray-500 tracking-widest uppercase">AI 사주/명리 운세</p>
+              </div>
             </a>
             <nav aria-label="메인 내비게이션" class="flex items-center gap-3 text-sm">
-              <a href="/login" class="text-gray-400 hover:text-gold-400 transition-colors">로그인</a>
+              {user ? (
+                <>
+                  <span class="text-xs text-gray-400" title="오늘 남은 무료 횟수">
+                    {isSubscriber ? (
+                      <span class="text-gold-400">∞</span>
+                    ) : (
+                      <><span class="text-gold-400 font-semibold">{remainingCount ?? 0}</span>/<span>3</span></>
+                    )}
+                    <span class="ml-0.5">회</span>
+                  </span>
+                  <a href="/mypage" class="text-gray-400 hover:text-gold-400 transition-colors" title={user.email}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 12c5.523 0 10 2.239 10 5v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1c0-2.761 4.477-5 10-5Z"/></svg>
+                  </a>
+                </>
+              ) : (
+                <a href="/login" class="text-gray-400 hover:text-gold-400 transition-colors">로그인</a>
+              )}
             </nav>
           </div>
         </header>
