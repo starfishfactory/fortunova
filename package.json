@@ -16,6 +16,7 @@
     "test:e2e:fortune": "CI=1 npx playwright test fortune.spec.ts",
     "test:e2e:local": "npx playwright test",
     "test:e2e:local:fortune": "npx playwright test fortune.spec.ts",
+    "test:e2e:ux": "CI=1 npx playwright test ux-audit.spec.ts",
     "test:e2e:report": "npx playwright show-report playwright-report"
   },
   "repository": {
