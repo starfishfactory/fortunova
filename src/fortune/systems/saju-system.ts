@@ -6,6 +6,8 @@ import { mapFourPillarsTenGods } from '@/engine/analysis/ten-gods.js';
 import { calculateElementBalance } from '@/engine/analysis/element-balance.js';
 import { determineDayMasterStrength } from '@/engine/analysis/day-master-strength.js';
 import { calculateMajorFate } from '@/engine/saju/major-fate.js';
+import { analyzeSinsal } from '@/engine/analysis/sinsal.js';
+import { analyzeAnnualFortune } from '@/engine/analysis/annual-fortune.js';
 import { lunarToSolar } from '@/engine/calendar/lunar-converter.js';
 
 const CATEGORY_LABELS: Record<FortuneCategory, string> = {
@@ -20,7 +22,7 @@ export type ChunkType = 'core' | 'sub' | 'meta';
 
 function buildSajuHeader(analysis: SystemAnalysis, category: FortuneCategory): string {
   const data = analysis.data as unknown as SajuAnalysis & { birthYear?: number; gender?: string };
-  const { fourPillars, elementBalance, dayMasterStrength, majorFate } = data;
+  const { fourPillars, elementBalance, dayMasterStrength, majorFate, sinsal, annualFortune } = data;
 
   const pillarStr = [
     `년주: ${fourPillars.year.stem}${fourPillars.year.branch}`,
@@ -49,6 +51,24 @@ function buildSajuHeader(analysis: SystemAnalysis, category: FortuneCategory): s
   else if (internationalAge < 65) lifeStage = '인생 후반 설계기, 은퇴 준비·건강 시기';
   else lifeStage = '노년기, 건강과 여유로운 삶 시기';
 
+  // 신살 정보
+  const sinsalStr = sinsal && sinsal.length > 0
+    ? sinsal.map(s => `${s.name}(${s.position})`).join(', ')
+    : '없음';
+
+  // 세운 정보
+  let annualStr = '';
+  if (annualFortune) {
+    const af = annualFortune;
+    annualStr = `${af.year}년 ${af.ganJi.stem}${af.ganJi.branch}(${af.tenGod})`;
+    if (af.interactions.length > 0) {
+      annualStr += ` [${af.interactions.map(i => `${i.type}(${i.branches[0]}↔${i.branches[1]})`).join(', ')}]`;
+    }
+    if (af.currentMajorFate) {
+      annualStr += ` 대운: ${af.currentMajorFate.ganJi.stem}${af.currentMajorFate.ganJi.branch}`;
+    }
+  }
+
   return [
     `한국 전통 사주/명리 운세 앱(Fortunova) 콘텐츠 생성.`,
     `사주 데이터를 기반으로 "${CATEGORY_LABELS[category]}" JSON을 생성하세요.`,
@@ -57,6 +77,8 @@ function buildSajuHeader(analysis: SystemAnalysis, category: FortuneCategory): s
     `- 사주팔자: ${pillarStr}`,
     `- 일간: ${fourPillars.day.stem} (${dayMasterStrength})`,
     `- 오행 비율: ${elementStr}`,
+    `- 신살: ${sinsalStr}`,
+    `- 세운: ${annualStr || '없음'}`,
     `- 대운 수: ${majorFate.length}개`,
     `- 날짜: ${today} / ${genderLabel} / 만 ${internationalAge}세(한국 ${koreanAge}세)`,
     `- 생애 단계: ${lifeStage}`,
@@ -219,6 +241,18 @@ export const sajuSystem: FortuneSystem = {
     }
     const majorFate = calculateMajorFate(fourPillars, birthInput.gender, solarDate);
 
+    // 신살 분석
+    const sinsal = analyzeSinsal(fourPillars);
+
+    // 세운 분석 (현재 연도)
+    const currentYear = new Date().getFullYear();
+    const annualFortune = analyzeAnnualFortune(
+      fourPillars,
+      majorFate,
+      currentYear,
+      solarDate.year,
+    );
+
     const analysis: SajuAnalysis = {
       fourPillars,
       tenGods,
@@ -226,6 +260,8 @@ export const sajuSystem: FortuneSystem = {
       dayMasterStrength,
       usefulGod: '목',
       majorFate,
+      sinsal,
+      annualFortune,
     };
 
     return {
@@ -236,7 +272,7 @@ export const sajuSystem: FortuneSystem = {
 
   buildPrompt(analysis: SystemAnalysis, category: FortuneCategory): string {
     const data = analysis.data as unknown as SajuAnalysis & { birthYear?: number; gender?: string };
-    const { fourPillars, elementBalance, dayMasterStrength, majorFate } = data;
+    const { fourPillars, elementBalance, dayMasterStrength, majorFate, sinsal, annualFortune } = data;
 
     const pillarStr = [
       `년주: ${fourPillars.year.stem}${fourPillars.year.branch}`,
@@ -266,6 +302,24 @@ export const sajuSystem: FortuneSystem = {
     else if (internationalAge < 65) lifeStage = '인생 후반 설계기, 은퇴 준비·건강 시기';
     else lifeStage = '노년기, 건강과 여유로운 삶 시기';
 
+    // 신살 정보
+    const sinsalStr = sinsal && sinsal.length > 0
+      ? sinsal.map(s => `${s.name}(${s.position}): ${s.description}`).join(', ')
+      : '없음';
+
+    // 세운 정보
+    let annualStr = '';
+    if (annualFortune) {
+      const af = annualFortune;
+      annualStr = `${af.year}년 ${af.ganJi.stem}${af.ganJi.branch}(천간 십신: ${af.tenGod}, 지지 십신: ${af.branchTenGod})`;
+      if (af.interactions.length > 0) {
+        annualStr += ` / 지지 상호작용: ${af.interactions.map(i => `${i.position} ${i.type}(${i.branches[0]}↔${i.branches[1]})`).join(', ')}`;
+      }
+      if (af.currentMajorFate) {
+        annualStr += ` / 현재 대운: ${af.currentMajorFate.ganJi.stem}${af.currentMajorFate.ganJi.branch}(${af.currentMajorFate.startAge}~${af.currentMajorFate.endAge}세)`;
+      }
+    }
+
     return [
       `다음은 한국 전통 사주/명리 운세 웹 애플리케이션(Fortunova)의 콘텐츠 생성 작업입니다.`,
       `아래 사주 분석 데이터를 기반으로 사용자에게 표시할 운세 JSON 데이터를 생성해주세요.`,
@@ -275,6 +329,8 @@ export const sajuSystem: FortuneSystem = {
       `- 사주팔자: ${pillarStr}`,
       `- 일간: ${fourPillars.day.stem} (${dayMasterStrength})`,
       `- 오행 비율: ${elementStr}`,
+      `- 신살: ${sinsalStr}`,
+      `- 세운: ${annualStr || '없음'}`,
       `- 대운 수: ${majorFate.length}개`,
       `- 오늘 날짜: ${today}`,
       `- 성별: ${genderLabel}`,
