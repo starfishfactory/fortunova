@@ -1,4 +1,4 @@
-import type { EarthlyBranch, FiveElement, YinYang } from '../types/index.js';
+import type { EarthlyBranch, FiveElement, YinYang, HiddenStem } from '../types/index.js';
 
 /** 지지 12개 배열 (자~해) */
 export const EARTHLY_BRANCHES: readonly EarthlyBranch[] = [
@@ -36,6 +36,27 @@ const BRANCH_HOUR_MAP: Record<EarthlyBranch, [number, number]> = {
   '술': [19, 21],
   '해': [21, 23],
 };
+
+/** 장간(藏干) 매핑 - 각 지지에 숨어있는 천간 */
+export const HIDDEN_STEMS_MAP: Record<EarthlyBranch, HiddenStem> = {
+  '자': { main: '계' },
+  '축': { main: '기', middle: '신', residual: '계' },
+  '인': { main: '갑', middle: '병', residual: '무' },
+  '묘': { main: '을' },
+  '진': { main: '무', middle: '을', residual: '계' },
+  '사': { main: '병', middle: '무', residual: '경' },
+  '오': { main: '정', middle: '기' },
+  '미': { main: '기', middle: '정', residual: '을' },
+  '신': { main: '경', middle: '임', residual: '무' },
+  '유': { main: '신' },
+  '술': { main: '무', middle: '신', residual: '정' },
+  '해': { main: '임', middle: '갑' },
+};
+
+/** 지지 → 장간 */
+export function getHiddenStems(branch: EarthlyBranch): HiddenStem {
+  return HIDDEN_STEMS_MAP[branch];
+}
 
 /** 지지 → 오행 */
 export function getBranchElement(branch: EarthlyBranch): FiveElement {

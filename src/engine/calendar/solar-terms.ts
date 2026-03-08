@@ -90,6 +90,108 @@ export function getMonthSolarTerm(date: SolarDate): number {
 }
 
 /**
+ * 두 SolarDate 간 일수 차이를 계산한다 (b - a)
+ */
+export function daysBetween(a: SolarDate, b: SolarDate): number {
+  const dateA = new Date(a.year, a.month - 1, a.day);
+  const dateB = new Date(b.year, b.month - 1, b.day);
+  return Math.round((dateB.getTime() - dateA.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * 다음 절기(12절기만)를 찾는다
+ *
+ * date 이후(당일 제외) 가장 가까운 12절기를 반환한다.
+ * 해당 년도에 없으면 다음 년도까지 검색한다.
+ */
+export function getNextJieQi(date: SolarDate): { name: string; date: SolarDate } {
+  const mmdd = toMMDD(date);
+
+  // 현재 년도에서 먼저 검색
+  const data = SOLAR_TERMS_DATA[date.year];
+  if (data) {
+    for (const termIndex of MONTH_DIVIDING_TERM_INDICES) {
+      const termMMDD = data[termIndex];
+      if (termMMDD > mmdd) {
+        const termName = SOLAR_TERM_NAMES[termIndex];
+        return {
+          name: termName,
+          date: {
+            year: date.year,
+            month: Math.floor(termMMDD / 100),
+            day: termMMDD % 100,
+          },
+        };
+      }
+    }
+  }
+
+  // 다음 년도에서 검색 (첫 번째 12절기 = 소한)
+  const nextYear = date.year + 1;
+  const nextData = SOLAR_TERMS_DATA[nextYear];
+  if (!nextData) {
+    throw new Error(`절기 데이터가 없는 년도입니다: ${nextYear}`);
+  }
+  const firstTermIndex = MONTH_DIVIDING_TERM_INDICES[0]; // 소한
+  const termMMDD = nextData[firstTermIndex];
+  return {
+    name: SOLAR_TERM_NAMES[firstTermIndex],
+    date: {
+      year: nextYear,
+      month: Math.floor(termMMDD / 100),
+      day: termMMDD % 100,
+    },
+  };
+}
+
+/**
+ * 이전 절기(12절기만)를 찾는다
+ *
+ * date 이전(당일 제외) 가장 가까운 12절기를 반환한다.
+ * 해당 년도에 없으면 이전 년도까지 검색한다.
+ */
+export function getPrevJieQi(date: SolarDate): { name: string; date: SolarDate } {
+  const mmdd = toMMDD(date);
+
+  // 현재 년도에서 역순 검색
+  const data = SOLAR_TERMS_DATA[date.year];
+  if (data) {
+    for (let i = MONTH_DIVIDING_TERM_INDICES.length - 1; i >= 0; i--) {
+      const termIndex = MONTH_DIVIDING_TERM_INDICES[i];
+      const termMMDD = data[termIndex];
+      if (termMMDD < mmdd) {
+        const termName = SOLAR_TERM_NAMES[termIndex];
+        return {
+          name: termName,
+          date: {
+            year: date.year,
+            month: Math.floor(termMMDD / 100),
+            day: termMMDD % 100,
+          },
+        };
+      }
+    }
+  }
+
+  // 이전 년도에서 검색 (마지막 12절기 = 대설)
+  const prevYear = date.year - 1;
+  const prevData = SOLAR_TERMS_DATA[prevYear];
+  if (!prevData) {
+    throw new Error(`절기 데이터가 없는 년도입니다: ${prevYear}`);
+  }
+  const lastTermIndex = MONTH_DIVIDING_TERM_INDICES[MONTH_DIVIDING_TERM_INDICES.length - 1]; // 대설
+  const termMMDD = prevData[lastTermIndex];
+  return {
+    name: SOLAR_TERM_NAMES[lastTermIndex],
+    date: {
+      year: prevYear,
+      month: Math.floor(termMMDD / 100),
+      day: termMMDD % 100,
+    },
+  };
+}
+
+/**
  * 특정 날짜가 해당 년도 입춘 전인지 판별한다
  */
 export function isBeforeIpchun(date: SolarDate, year: number): boolean {

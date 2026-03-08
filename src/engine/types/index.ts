@@ -5,6 +5,7 @@ export type {
   YinYang,
   GanJi,
   ElementRelation,
+  HiddenStem,
 } from './stems-branches.js';
 
 export type {
@@ -25,4 +26,9 @@ export type {
   DayMasterStrength,
   MajorFatePeriod,
   SajuAnalysis,
+  SinsalName,
+  SinsalResult,
+  BranchInteraction,
+  BranchInteractionResult,
+  AnnualFortune,
 } from './analysis.js';
