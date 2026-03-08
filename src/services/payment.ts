@@ -100,16 +100,21 @@ export function confirmPaymentAndActivate(
   const endDate = new Date(now);
   endDate.setMonth(endDate.getMonth() + durationMonths);
 
-  // Update payment status
-  db.prepare(
-    "UPDATE payments SET status = 'completed', provider_payment_id = ? WHERE id = ?",
-  ).run(paymentKey, paymentId);
+  // 결제 확인 + 구독 생성을 트랜잭션으로 묶음
+  const activate = db.transaction(() => {
+    db.prepare(
+      "UPDATE payments SET status = 'completed', provider_payment_id = ? WHERE id = ?",
+    ).run(paymentKey, paymentId);
 
-  // Create subscription
-  const subResult = db.prepare(
-    `INSERT INTO subscriptions (user_id, plan, status, start_date, end_date, created_at)
-     VALUES (?, ?, 'active', ?, ?, ?)`,
-  ).run(userId, planId, startDate, endDate.toISOString(), startDate);
+    const subResult = db.prepare(
+      `INSERT INTO subscriptions (user_id, plan, status, start_date, end_date, created_at)
+       VALUES (?, ?, 'active', ?, ?, ?)`,
+    ).run(userId, planId, startDate, endDate.toISOString(), startDate);
+
+    return subResult;
+  });
+
+  const subResult = activate();
 
   return {
     payment: {

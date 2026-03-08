@@ -19,7 +19,7 @@ function createMockDb() {
   const mockGet = vi.fn();
   const mockAll = vi.fn().mockReturnValue([]);
   const mockPrepare = vi.fn().mockReturnValue({ run: mockRun, get: mockGet, all: mockAll });
-  const mockTransaction = vi.fn((fn: any) => fn());
+  const mockTransaction = vi.fn((fn: any) => fn);
   return { prepare: mockPrepare, transaction: mockTransaction, _run: mockRun, _get: mockGet, _all: mockAll };
 }
 
@@ -71,7 +71,7 @@ describe('payment 서비스', () => {
       const mockGet = vi.fn();
       const mockAll = vi.fn().mockReturnValue([]);
       const mockPrepare = vi.fn().mockReturnValue({ run: mockRun, get: mockGet, all: mockAll });
-      const mockTransaction = vi.fn((fn: any) => fn());
+      const mockTransaction = vi.fn((fn: any) => fn);
       const mockDb = { prepare: mockPrepare, transaction: mockTransaction, _run: mockRun, _get: mockGet, _all: mockAll };
 
       // First get: payment record
