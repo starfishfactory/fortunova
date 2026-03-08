@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 340" width="300" height="340">
+  <rect width="300" height="340" fill="#1e2a3a"/>
+  <g stroke="#c9a84c" fill="none" stroke-linejoin="miter">
+    <polygon points="150.00,75.00 169.29,130.71 199.29,115.71 184.29,145.71 238.93,165.00 184.29,184.29 199.29,214.29 169.29,199.29 150.00,255.00 130.71,199.29 100.71,214.29 115.71,184.29 61.07,165.00 115.71,145.71 100.71,115.71 130.71,130.71" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="150.00" y2="75.00" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="150.00" y2="255.00" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="238.93" y2="165.00" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="61.07" y2="165.00" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="199.29" y2="115.71" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="199.29" y2="214.29" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="100.71" y2="214.29" stroke-width="4.0"/>
+    <line x1="150.00" y1="165.00" x2="100.71" y2="115.71" stroke-width="4.0"/>
+    <line x1="150.00" y1="75.00" x2="169.29" y2="130.71" stroke-width="4.0"/>
+    <line x1="150.00" y1="75.00" x2="130.71" y2="130.71" stroke-width="4.0"/>
+    <line x1="238.93" y1="165.00" x2="184.29" y2="145.71" stroke-width="4.0"/>
+    <line x1="238.93" y1="165.00" x2="184.29" y2="184.29" stroke-width="4.0"/>
+    <line x1="150.00" y1="255.00" x2="169.29" y2="199.29" stroke-width="4.0"/>
+    <line x1="150.00" y1="255.00" x2="130.71" y2="199.29" stroke-width="4.0"/>
+    <line x1="61.07" y1="165.00" x2="115.71" y2="184.29" stroke-width="4.0"/>
+    <line x1="61.07" y1="165.00" x2="115.71" y2="145.71" stroke-width="4.0"/>
+    <line x1="199.29" y1="115.71" x2="169.29" y2="130.71" stroke-width="4.0"/>
+    <line x1="199.29" y1="115.71" x2="184.29" y2="145.71" stroke-width="4.0"/>
+    <line x1="199.29" y1="214.29" x2="184.29" y2="184.29" stroke-width="4.0"/>
+    <line x1="199.29" y1="214.29" x2="169.29" y2="199.29" stroke-width="4.0"/>
+    <line x1="100.71" y1="214.29" x2="130.71" y2="199.29" stroke-width="4.0"/>
+    <line x1="100.71" y1="214.29" x2="115.71" y2="184.29" stroke-width="4.0"/>
+    <line x1="100.71" y1="115.71" x2="115.71" y2="145.71" stroke-width="4.0"/>
+    <line x1="100.71" y1="115.71" x2="130.71" y2="130.71" stroke-width="4.0"/>
+  </g>
+  <text x="150" y="293.0" text-anchor="middle"
+    font-family="'Gill Sans','Century Gothic','Trebuchet MS',Arial,sans-serif"
+    font-size="19.5" font-weight="300" letter-spacing="5" fill="#c9a84c">FORTUNOVA</text>
+</svg>

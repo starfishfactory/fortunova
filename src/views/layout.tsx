@@ -14,6 +14,7 @@ export function Layout({ children, title }: { children: any; title?: string }) {
         <meta property="og:image" content="https://fortunova.molidae.site/public/og-image.png" />
         <meta property="og:url" content="https://fortunova.molidae.site" />
         <link rel="icon" href="/public/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/public/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0a0e27" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
