@@ -2,3 +2,4 @@ export { getTenGod, mapFourPillarsTenGods } from './ten-gods.js';
 export { calculateElementBalance } from './element-balance.js';
 export { determineDayMasterStrength } from './day-master-strength.js';
 export { analyzeSinsal } from './sinsal.js';
+export { analyzeAnnualFortune } from './annual-fortune.js';

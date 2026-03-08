@@ -28,4 +28,7 @@ export type {
   SajuAnalysis,
   SinsalName,
   SinsalResult,
+  BranchInteraction,
+  BranchInteractionResult,
+  AnnualFortune,
 } from './analysis.js';
