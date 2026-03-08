@@ -94,8 +94,8 @@ export function HomePage() {
         </div>
 
         {/* 성별 */}
-        <div>
-          <label class="text-sm font-medium text-gray-300 block mb-1">성별</label>
+        <fieldset aria-label="성별" class="space-y-1">
+          <legend class="text-sm font-medium text-gray-300">성별</legend>
           <div class="flex gap-4">
             <label class="flex items-center gap-1">
               <input type="radio" name="gender" value="M" checked class="radio-dark" />
@@ -106,7 +106,7 @@ export function HomePage() {
               <span class="text-sm text-gray-300">여성</span>
             </label>
           </div>
-        </div>
+        </fieldset>
 
         {/* 운세 카테고리 */}
         <div>

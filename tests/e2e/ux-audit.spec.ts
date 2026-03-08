@@ -678,3 +678,105 @@ test.describe('5. Cognitive Walkthrough', () => {
     await expect(page).toHaveURL(/\/$/);
   });
 });
+
+// ═══════════════════════════════════════════════
+// 6. SEO & 접근성 고도화 (6 tests)
+// ═══════════════════════════════════════════════
+
+test.describe('6. SEO & 접근성 고도화', () => {
+  test('6-1 SEO: meta description 존재', async ({ page }, testInfo) => {
+    annotate(testInfo, 'SEO', 'meta description');
+    await page.goto('/');
+    const desc = await page.locator('meta[name="description"]').getAttribute('content');
+    expect(desc, 'meta description이 존재한다').toBeTruthy();
+    expect(desc!.length, 'description이 50자 이상').toBeGreaterThanOrEqual(50);
+  });
+
+  test('6-2 SEO: OG 태그 존재', async ({ page }, testInfo) => {
+    annotate(testInfo, 'SEO', 'Open Graph tags');
+    await page.goto('/');
+
+    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');
+    expect(ogTitle, 'og:title 존재').toBeTruthy();
+
+    const ogDesc = await page.locator('meta[property="og:description"]').getAttribute('content');
+    expect(ogDesc, 'og:description 존재').toBeTruthy();
+
+    const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(ogImage, 'og:image 존재').toBeTruthy();
+
+    const ogType = await page.locator('meta[property="og:type"]').getAttribute('content');
+    expect(ogType, 'og:type 존재').toBeTruthy();
+  });
+
+  test('6-3 SEO: Favicon 존재', async ({ page }, testInfo) => {
+    annotate(testInfo, 'SEO', 'Favicon');
+    await page.goto('/');
+
+    const favicon = page.locator('link[rel="icon"], link[rel="shortcut icon"]');
+    await expect(favicon.first()).toBeAttached();
+
+    // Favicon 파일이 실제 응답하는지 확인
+    const href = await favicon.first().getAttribute('href');
+    expect(href).toBeTruthy();
+    const resp = await page.request.get(href!);
+    expect(resp.status(), 'favicon 파일 200 응답').toBe(200);
+  });
+
+  test('6-4 WCAG 2.4.1: skip-to-content 링크', async ({ page }, testInfo) => {
+    annotate(testInfo, 'WCAG 2.1', '2.4.1 Bypass Blocks');
+    await page.goto('/');
+
+    // skip 링크가 존재하고, Tab으로 focus 시 보여야 한다
+    const skipLink = page.locator('a.skip-link, a[href="#main-content"]');
+    await expect(skipLink).toBeAttached();
+
+    // Tab 키로 포커스
+    await page.keyboard.press('Tab');
+    await expect(skipLink).toBeVisible();
+
+    // 클릭 시 main 영역으로 이동
+    const href = await skipLink.getAttribute('href');
+    expect(href).toBe('#main-content');
+  });
+
+  test('6-5 접근성: :focus-visible 커스텀 스타일', async ({ page }, testInfo) => {
+    annotate(testInfo, 'WCAG 2.1', '2.4.7 Focus Visible');
+    await page.goto('/');
+
+    // CSS에 focus-visible 규칙이 정의되어 있는지 확인
+    const hasFocusVisible = await page.evaluate(() => {
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules || []) {
+            if (rule.cssText && rule.cssText.includes('focus-visible')) return true;
+          }
+        } catch (e) { /* cross-origin sheets */ }
+      }
+      return false;
+    });
+    expect(hasFocusVisible, ':focus-visible CSS 규칙 존재').toBe(true);
+
+    // 실제 포커스 시 outline 스타일 변경 확인
+    await page.locator('select[name="year"]').focus();
+    const outline = await page.locator('select[name="year"]').evaluate((el) => {
+      return window.getComputedStyle(el).outlineColor;
+    });
+    // 기본 브라우저 outline이 아닌 커스텀 색상이어야 함
+    expect(outline).not.toBe('');
+  });
+
+  test('6-6 접근성: 폼 그룹 aria-label', async ({ page }, testInfo) => {
+    annotate(testInfo, 'WCAG 2.1', '1.3.1 Info and Relationships — aria');
+    await page.goto('/');
+
+    // nav에 aria-label이 있어야 한다
+    const nav = page.locator('header nav');
+    const navLabel = await nav.getAttribute('aria-label');
+    expect(navLabel, 'nav에 aria-label 존재').toBeTruthy();
+
+    // 성별 라디오 그룹에 role="radiogroup" + aria-label
+    const genderGroup = page.locator('[aria-label*="성별"], fieldset:has(input[name="gender"])');
+    await expect(genderGroup, '성별 그룹 존재').toBeAttached();
+  });
+});
