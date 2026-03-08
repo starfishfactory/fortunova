@@ -39,6 +39,15 @@ npm run typecheck        # 타입 체크
 - 운세 결과는 20개 항목 전체 통과 필요 (100%)
 - `CI` 환경변수 유무로 headless/headed 자동 전환
 
+## 쿠키 & 클라이언트 저장소
+
+| 이름 | 종류 | 용도 | 비고 |
+|------|------|------|------|
+| `token` | httpOnly 쿠키 | JWT 인증 토큰 | 로그인/회원가입 시 설정, 로그아웃 시 삭제, maxAge 24h |
+| `fortunova_input` | 일반 쿠키 | 폼 입력값 저장/복원 | 클라이언트에서 읽기, maxAge 10년 |
+| `fortunova_result_*` | localStorage | 운세 결과 캐시 | 당일+같은 빌드만 유지, 캐시 히트 시 SSE 스킵 |
+| `fortunova_build` | localStorage | 빌드 버전 추적 | 새 빌드 배포 시 결과 캐시 초기화 |
+
 ## 디렉토리 구조
 
 - `src/engine/types/` - 공유 타입 계약
