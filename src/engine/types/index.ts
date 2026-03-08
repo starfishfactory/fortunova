@@ -26,4 +26,6 @@ export type {
   DayMasterStrength,
   MajorFatePeriod,
   SajuAnalysis,
+  SinsalName,
+  SinsalResult,
 } from './analysis.js';
