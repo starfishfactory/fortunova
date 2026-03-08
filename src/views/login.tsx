@@ -2,6 +2,7 @@ export function LoginPage() {
   return (
     <div class="mt-6">
       <div class="text-center mb-6">
+        <img src="/public/favicon.svg" alt="Fortunova" width="48" height="48" class="mx-auto mb-3" />
         <h2 class="text-2xl font-serif font-bold text-gold-400 mb-2">로그인</h2>
         <hr class="divider-gold" />
       </div>

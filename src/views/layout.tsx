@@ -92,7 +92,8 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
         </main>
 
         <footer class="text-center text-sm text-gray-500 p-4 mt-8 relative z-10">
-          &copy; 2026 Fortunova
+          <img src="/public/favicon.svg" alt="" width="20" height="20" class="inline-block opacity-40 mr-1 -mt-0.5" />
+          <span>&copy; 2026 Fortunova</span>
         </footer>
 
         {/* Stars */}
