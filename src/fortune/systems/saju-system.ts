@@ -1,11 +1,12 @@
 import type { FortuneSystem, FortuneCategory, FortuneResult, SystemAnalysis } from '../types.js';
-import type { BirthInput } from '@/engine/types/index.js';
+import type { BirthInput, SolarDate } from '@/engine/types/index.js';
 import type { SajuAnalysis } from '@/engine/types/analysis.js';
 import { calculateFourPillars } from '@/engine/saju/four-pillars.js';
 import { mapFourPillarsTenGods } from '@/engine/analysis/ten-gods.js';
 import { calculateElementBalance } from '@/engine/analysis/element-balance.js';
 import { determineDayMasterStrength } from '@/engine/analysis/day-master-strength.js';
 import { calculateMajorFate } from '@/engine/saju/major-fate.js';
+import { lunarToSolar } from '@/engine/calendar/lunar-converter.js';
 
 const CATEGORY_LABELS: Record<FortuneCategory, string> = {
   daily: '오늘의 운세',
@@ -203,7 +204,20 @@ export const sajuSystem: FortuneSystem = {
     const tenGods = mapFourPillarsTenGods(fourPillars);
     const elementBalance = calculateElementBalance(fourPillars);
     const dayMasterStrength = determineDayMasterStrength(fourPillars, elementBalance);
-    const majorFate = calculateMajorFate(fourPillars, birthInput.gender, birthInput.year);
+
+    // 양력 날짜 추출 (음력인 경우 변환)
+    let solarDate: SolarDate;
+    if (birthInput.isLunar) {
+      solarDate = lunarToSolar({
+        year: birthInput.year,
+        month: birthInput.month,
+        day: birthInput.day,
+        isLeapMonth: birthInput.isLeapMonth,
+      });
+    } else {
+      solarDate = { year: birthInput.year, month: birthInput.month, day: birthInput.day };
+    }
+    const majorFate = calculateMajorFate(fourPillars, birthInput.gender, solarDate);
 
     const analysis: SajuAnalysis = {
       fourPillars,
