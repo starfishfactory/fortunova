@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getSolarTermDate, getMonthSolarTerm, isBeforeIpchun } from '@/engine/calendar/solar-terms.js';
+import { getSolarTermDate, getMonthSolarTerm, isBeforeIpchun, getNextJieQi, getPrevJieQi } from '@/engine/calendar/solar-terms.js';
 
 describe('getSolarTermDate', () => {
   it('2024년 입춘 날짜를 반환한다', () => {
@@ -121,5 +121,59 @@ describe('isBeforeIpchun', () => {
 
   it('2025-02-03은 2025년 입춘 당일이므로 입춘 전이 아니다', () => {
     expect(isBeforeIpchun({ year: 2025, month: 2, day: 3 }, 2025)).toBe(false);
+  });
+});
+
+describe('getNextJieQi', () => {
+  it('2024-03-15 이후 다음 절기는 청명(4/4)이다', () => {
+    const result = getNextJieQi({ year: 2024, month: 3, day: 15 });
+    expect(result).toEqual({ name: '청명', date: { year: 2024, month: 4, day: 4 } });
+  });
+
+  it('2024-03-05(경칩 당일) 이후 다음 절기는 청명(4/4)이다', () => {
+    const result = getNextJieQi({ year: 2024, month: 3, day: 5 });
+    expect(result).toEqual({ name: '청명', date: { year: 2024, month: 4, day: 4 } });
+  });
+
+  it('2024-03-04(경칩 전날) 이후 다음 절기는 경칩(3/5)이다', () => {
+    const result = getNextJieQi({ year: 2024, month: 3, day: 4 });
+    expect(result).toEqual({ name: '경칩', date: { year: 2024, month: 3, day: 5 } });
+  });
+
+  it('2024-12-10 이후 다음 절기는 2025년 소한(1/5)이다', () => {
+    const result = getNextJieQi({ year: 2024, month: 12, day: 10 });
+    expect(result).toEqual({ name: '소한', date: { year: 2025, month: 1, day: 5 } });
+  });
+
+  it('2024-01-01 이후 다음 절기는 소한(1/6)이다', () => {
+    const result = getNextJieQi({ year: 2024, month: 1, day: 1 });
+    expect(result).toEqual({ name: '소한', date: { year: 2024, month: 1, day: 6 } });
+  });
+});
+
+describe('getPrevJieQi', () => {
+  it('2024-03-15 이전 절기는 경칩(3/5)이다', () => {
+    const result = getPrevJieQi({ year: 2024, month: 3, day: 15 });
+    expect(result).toEqual({ name: '경칩', date: { year: 2024, month: 3, day: 5 } });
+  });
+
+  it('2024-03-05(경칩 당일) 이전 절기는 입춘(2/4)이다', () => {
+    const result = getPrevJieQi({ year: 2024, month: 3, day: 5 });
+    expect(result).toEqual({ name: '입춘', date: { year: 2024, month: 2, day: 4 } });
+  });
+
+  it('2024-03-06(경칩 다음날) 이전 절기는 경칩(3/5)이다', () => {
+    const result = getPrevJieQi({ year: 2024, month: 3, day: 6 });
+    expect(result).toEqual({ name: '경칩', date: { year: 2024, month: 3, day: 5 } });
+  });
+
+  it('2024-01-05(소한 전날) 이전 절기는 2023년 대설(12/7)이다', () => {
+    const result = getPrevJieQi({ year: 2024, month: 1, day: 5 });
+    expect(result).toEqual({ name: '대설', date: { year: 2023, month: 12, day: 7 } });
+  });
+
+  it('2024-01-10 이전 절기는 소한(1/6)이다', () => {
+    const result = getPrevJieQi({ year: 2024, month: 1, day: 10 });
+    expect(result).toEqual({ name: '소한', date: { year: 2024, month: 1, day: 6 } });
   });
 });
