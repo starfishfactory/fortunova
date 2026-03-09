@@ -123,6 +123,7 @@ fortunePartials.post('/fortune-result', async (c) => {
         sajuSummary={result.sajuSummary}
         cached={result.cached}
         remainingFreeCount={result.remainingFreeCount}
+        category={category as import('@/fortune/types.js').FortuneCategory}
       />,
     );
   } catch (e) {

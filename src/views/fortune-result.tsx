@@ -1,10 +1,19 @@
-import type { FortuneResult } from '@/fortune/types.js';
+import type { FortuneResult, FortuneCategory } from '@/fortune/types.js';
+
+const CATEGORY_HEADERS: Record<FortuneCategory, { icon: string; label: string }> = {
+  daily: { icon: '📖', label: '오늘의 운세' },
+  love: { icon: '💕', label: '애정운' },
+  career: { icon: '💼', label: '직장/사업운' },
+  health: { icon: '💪', label: '건강운' },
+  wealth: { icon: '💰', label: '재물운' },
+};
 
 interface FortuneResultProps {
   fortune: FortuneResult;
   sajuSummary: { fourPillars: string };
   cached: boolean;
   remainingFreeCount: number;
+  category?: FortuneCategory;
 }
 
 function ScoreBar({ score, label }: { score: number; label: string }) {
@@ -29,14 +38,21 @@ function RatingStars({ rating }: { rating: number }) {
   return <span class="text-sm">{stars}</span>;
 }
 
-export function FortuneResultPartial({ fortune, sajuSummary, cached, remainingFreeCount }: FortuneResultProps) {
+export function FortuneResultPartial({ fortune, sajuSummary, cached, remainingFreeCount, category = 'daily' }: FortuneResultProps) {
   const SUB_LABELS: Record<string, string> = { wealth: '💰 재물운', health: '💪 건강운', love: '💕 연애운', career: '💼 직장운' };
   const scoreColor = fortune.score >= 80 ? '#e8c170' : fortune.score >= 60 ? '#d4a853' : fortune.score >= 40 ? '#b8923d' : '#8b6914';
+  const header = CATEGORY_HEADERS[category] ?? CATEGORY_HEADERS.daily;
 
   return (
     <div class="fortune-reveal">
       {/* 종합 점수 + 요약 */}
       <div class="glass-card p-6 mt-4">
+        {/* 카테고리 뱃지 */}
+        <div class="text-center mb-3">
+          <span class="inline-block text-xs px-3 py-1 rounded-full" style="background: rgba(212, 168, 83, 0.1); border: 1px solid rgba(212, 168, 83, 0.2); color: var(--gold-300);">
+            {header.icon} {header.label}
+          </span>
+        </div>
         <div class="text-center mb-4">
           <div class="score-glow inline-block px-6 py-3">
             <span class="text-5xl font-serif font-bold" style={`color: ${scoreColor};`}>{fortune.score}</span>
@@ -48,7 +64,7 @@ export function FortuneResultPartial({ fortune, sajuSummary, cached, remainingFr
 
         {/* 상세 설명 */}
         <div class="mb-4">
-          <h3 class="text-sm font-medium text-gold-400 mb-2">📖 오늘의 운세</h3>
+          <h3 class="text-sm font-medium text-gold-400 mb-2">{header.icon} {header.label}</h3>
           <p class="text-gray-300 whitespace-pre-line leading-relaxed text-sm">{fortune.detail}</p>
         </div>
 
@@ -176,11 +192,34 @@ export function FortuneResultPartial({ fortune, sajuSummary, cached, remainingFr
         <p id="share-feedback" class="text-xs text-gold-300 mt-2" style="display:none;"></p>
       </div>
 
+      {/* 다른 카테고리 유도 */}
+      {remainingFreeCount > 0 && (
+        <div class="mt-4">
+          <p class="text-xs text-gray-500 mb-2 text-center">다른 운세도 확인해보세요</p>
+          <div class="flex flex-wrap justify-center gap-2">
+            {(Object.entries(CATEGORY_HEADERS) as [FortuneCategory, { icon: string; label: string }][])
+              .filter(([key]) => key !== category)
+              .map(([key, h]) => (
+                <button
+                  type="button"
+                  class="category-chip text-xs px-3 py-1.5 rounded-full cursor-pointer"
+                  style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary);"
+                  data-category={key}
+                >
+                  {h.icon} {h.label}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* 사주 정보 + 메타 */}
       <div class="text-sm text-gray-500 mt-4 p-3 rounded" style="background: rgba(255,255,255,0.02);">
         <p>🏛 사주: {sajuSummary.fourPillars}</p>
         {cached && <p class="mt-1">📋 캐시된 결과</p>}
-        <p class="mt-1">🎫 오늘 남은 무료 횟수: {remainingFreeCount}회</p>
+        <p class="mt-1">
+          🎫 오늘 남은 무료 횟수: <span class={remainingFreeCount <= 1 ? 'text-red-400 font-semibold' : 'text-gold-400 font-semibold'}>{remainingFreeCount}회</span>
+        </p>
       </div>
     </div>
   );

@@ -161,6 +161,19 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
 
   document.addEventListener('click', function(evt) {
     if (evt.target && evt.target.id === 'reopen-form') expandForm();
+    // 카테고리 칩 클릭 → 해당 카테고리로 폼 변경 후 재제출
+    var chip = evt.target && evt.target.closest ? evt.target.closest('.category-chip') : null;
+    if (chip) {
+      var cat = chip.getAttribute('data-category');
+      if (!cat) return;
+      var form = document.getElementById('fortune-form');
+      if (!form) return;
+      var sel = form.querySelector('select[name="category"]');
+      if (sel) sel.value = cat;
+      expandForm();
+      // 캐시 키가 달라지므로 바로 제출
+      setTimeout(function() { submitFortuneSSE(form); }, 200);
+    }
   });
 
   // --- Cookie form save/restore ---
