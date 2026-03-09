@@ -47,17 +47,17 @@ export function _resetSemaphore(): void {
  * Claude Sonnet으로 프롬프트를 전송하고 응답을 받는다.
  * Base64 인코딩으로 프롬프트의 특수문자 이스케이프 문제를 회피한다.
  */
-export async function callClaude(prompt: string): Promise<string> {
+export async function callClaude(prompt: string, options?: { timeout?: number }): Promise<string> {
   await claudeSemaphore.acquire();
   try {
-    return await executeClaudeCli(prompt);
+    return await executeClaudeCli(prompt, options?.timeout);
   } finally {
     claudeSemaphore.release();
   }
 }
 
-function executeClaudeCli(prompt: string): Promise<string> {
-  const timeout = Math.max(config.claudeTimeout, 120000);
+function executeClaudeCli(prompt: string, overrideTimeout?: number): Promise<string> {
+  const timeout = overrideTimeout ?? Math.max(config.claudeTimeout, 120000);
   const b64 = Buffer.from(prompt, 'utf-8').toString('base64');
 
   return new Promise((resolve, reject) => {

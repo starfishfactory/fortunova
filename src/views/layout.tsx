@@ -258,6 +258,37 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
     if (result) result.innerHTML = '';
 
     var es = new EventSource(url);
+    var chunksCompleted = 0;
+    var fallbackTimer = null;
+
+    function startFallbackTimer() {
+      if (fallbackTimer) return;
+      fallbackTimer = setTimeout(function() {
+        console.warn('[sse] fallback: fetching result after timeout');
+        es.close();
+        fetchFortuneResult(form, ld, result);
+      }, 30000);
+    }
+
+    function fetchFortuneResult(f, loader, res) {
+      var fd2 = new FormData(f);
+      var body = new URLSearchParams();
+      fd2.forEach(function(v, k) { body.append(k, v); });
+      fetch('/partials/fortune-result', { method: 'POST', body: body })
+        .then(function(resp) { return resp.text(); })
+        .then(function(html) {
+          stopTips();
+          if (loader) loader.style.display = 'none';
+          if (res) {
+            res.innerHTML = html;
+            var cacheKey = buildCacheKey(f);
+            if (html.indexOf('파싱에 실패')===-1 && html.indexOf('LLM_UNAVAILABLE')===-1 && html.indexOf('VALIDATION_ERROR')===-1) {
+              try { localStorage.setItem(cacheKey, html); } catch(err) {}
+            }
+          }
+        })
+        .catch(function() { stopTips(); if (loader) loader.style.display = 'none'; });
+    }
 
     es.onmessage = function(e) {
       try {
@@ -267,6 +298,8 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
             ['core','sub','meta'].forEach(function(c) { setStepDone(c, 0); });
           } else {
             setStepDone(d.chunk, d.elapsed);
+            chunksCompleted++;
+            if (chunksCompleted >= 3) startFallbackTimer();
           }
         } else if (d.type === 'critique') {
           var cs = document.getElementById('step-critique');
@@ -279,28 +312,9 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
           var rss = document.getElementById('step-retry-status');
           if (rss) rss.textContent = (d.elapsed/1000).toFixed(1) + 's';
         } else if (d.type === 'done' || d.type === 'error') {
+          if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
           es.close();
-          // SSE 완료 → POST로 결과 HTML 가져오기 (서버 캐시 히트)
-          var fd2 = new FormData(form);
-          var body = new URLSearchParams();
-          fd2.forEach(function(v, k) { body.append(k, v); });
-          fetch('/partials/fortune-result', { method: 'POST', body: body })
-            .then(function(resp) { return resp.text(); })
-            .then(function(html) {
-              stopTips();
-              if (ld) ld.style.display = 'none';
-              if (result) {
-                result.innerHTML = html;
-                var cacheKey = buildCacheKey(form);
-                if (html.indexOf('파싱에 실패')===-1 && html.indexOf('LLM_UNAVAILABLE')===-1 && html.indexOf('VALIDATION_ERROR')===-1) {
-                  try { localStorage.setItem(cacheKey, html); } catch(err) {}
-                }
-              }
-            })
-            .catch(function() {
-              stopTips();
-              if (ld) ld.style.display = 'none';
-            });
+          fetchFortuneResult(form, ld, result);
         }
       } catch(err) {}
     };

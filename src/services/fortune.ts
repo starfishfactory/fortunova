@@ -121,29 +121,27 @@ export async function getFortuneStream(
       return;
     }
 
-    // Generator-Critique loop: core 청크 품질 평가 및 조건부 재생성
+    // Generator-Critique loop: core 청크 품질 평가 및 조건부 재생성 (짧은 타임아웃)
     let finalCoreResponse = coreResult.response;
     try {
       const critiquePrompt = buildCritiquePrompt(analysis, category, finalCoreResponse);
-      const critiqueResponse = await callClaude(critiquePrompt);
+      const critiqueResponse = await callClaude(critiquePrompt, { timeout: 20000 });
       const critique = parseCritiqueResult(critiqueResponse);
       onEvent({ type: 'critique', score: critique.score, elapsed: Date.now() - startTime });
 
       if (critique.shouldRegenerate) {
         console.warn(`[fortune-stream] critique score ${critique.score}/10 → regenerating core`);
         const enhancedPrompt = buildEnhancedCorePrompt(analysis, category, critique.feedback);
-        const enhancedCore = await callClaude(enhancedPrompt);
+        const enhancedCore = await callClaude(enhancedPrompt, { timeout: 30000 });
         if (enhancedCore) {
           finalCoreResponse = enhancedCore;
-          // 청크 결과 업데이트
           const idx = chunkResults.findIndex((r) => r.type === 'core');
           if (idx >= 0) chunkResults[idx] = { type: 'core', response: enhancedCore };
         }
         onEvent({ type: 'retry', elapsed: Date.now() - startTime });
       }
     } catch (critiqueErr) {
-      console.error('[fortune-stream] critique/retry failed:', (critiqueErr as Error).message);
-      // 비평 실패 시 원본 결과 그대로 사용
+      console.error('[fortune-stream] critique/retry skipped:', (critiqueErr as Error).message);
     }
 
     const fortune = mergeChunkResults(
@@ -256,22 +254,22 @@ export async function getFortune(
     throw new Error('LLM_UNAVAILABLE');
   }
 
-  // Generator-Critique loop: core 청크 품질 평가 및 조건부 재생성
+  // Generator-Critique loop: core 청크 품질 평가 및 조건부 재생성 (짧은 타임아웃)
   try {
     const critiquePrompt = buildCritiquePrompt(analysis, category, chunks[0].response!);
-    const critiqueResponse = await callClaude(critiquePrompt);
+    const critiqueResponse = await callClaude(critiquePrompt, { timeout: 20000 });
     const critique = parseCritiqueResult(critiqueResponse);
 
     if (critique.shouldRegenerate) {
       console.warn(`[fortune] critique score ${critique.score}/10 → regenerating core`);
       const enhancedPrompt = buildEnhancedCorePrompt(analysis, category, critique.feedback);
-      const enhancedCore = await callClaude(enhancedPrompt);
+      const enhancedCore = await callClaude(enhancedPrompt, { timeout: 30000 });
       if (enhancedCore) {
         chunks[0] = { type: 'core', response: enhancedCore };
       }
     }
   } catch (critiqueErr) {
-    console.error('[fortune] critique/retry failed:', (critiqueErr as Error).message);
+    console.error('[fortune] critique/retry skipped:', (critiqueErr as Error).message);
   }
 
   const fortune = mergeChunkResults(chunks);
