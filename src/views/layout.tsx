@@ -19,8 +19,8 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Fortunova - AI 사주/명리 운세" />
         <meta property="og:description" content="AI 기반 사주팔자 분석과 오늘의 운세를 확인하세요." />
-        <meta property="og:image" content="https://fortunova.molidae.site/public/og-image.png" />
-        <meta property="og:url" content="https://fortunova.molidae.site" />
+        <meta property="og:image" content="https://fortunova.interfn.com/public/og-image.png" />
+        <meta property="og:url" content="https://fortunova.interfn.com" />
         <link rel="icon" href="/public/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/public/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
@@ -350,12 +350,12 @@ export function Layout({ children, title, user, remainingCount, isSubscriber }: 
   // --- Share button ---
   function buildShareLink() {
     var saved = readCookie();
-    if (!saved) return 'https://fortunova.molidae.site';
+    if (!saved) return 'https://fortunova.interfn.com';
     var params = [];
     ['year','month','day','hour','gender','calendarType','isLeapMonth','category'].forEach(function(k) {
       if (saved[k]) params.push(k + '=' + encodeURIComponent(saved[k]));
     });
-    return 'https://fortunova.molidae.site' + (params.length ? '?' + params.join('&') : '');
+    return 'https://fortunova.interfn.com' + (params.length ? '?' + params.join('&') : '');
   }
   function buildShareText(btn) {
     var score = btn.getAttribute('data-score') || '';
