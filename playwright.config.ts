@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-const BASE_URL = process.env.E2E_BASE_URL || 'https://fortunova.molidae.site';
+const BASE_URL = process.env.E2E_BASE_URL || 'https://fortunova.interfn.com';
 const IS_CI = !!process.env.CI;
 
 export default defineConfig({

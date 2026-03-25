@@ -3,7 +3,7 @@ import re
 import sys
 from playwright.sync_api import sync_playwright
 
-BASE_URL = "https://fortunova.molidae.site"
+BASE_URL = "https://fortunova.interfn.com"
 
 
 def warm_cache():

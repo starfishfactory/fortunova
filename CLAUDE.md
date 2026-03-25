@@ -32,7 +32,7 @@ npm run typecheck        # 타입 체크
 
 ## E2E 테스트
 
-- **대상**: `https://fortunova.molidae.site` 실 서버
+- **대상**: `https://fortunova.interfn.com` 실 서버
 - **설정**: `playwright.config.ts`, 테스트: `tests/e2e/`
 - **구성**: health(6) + auth(4) + fortune(3) + subscription(5) = 18개
 - 기능 변경 후 `npm run test:e2e`로 실 서버 동작 검증할 것

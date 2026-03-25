@@ -4,7 +4,7 @@
  */
 import { chromium } from 'playwright';
 
-const BASE_URL = 'https://fortunova.molidae.site';
+const BASE_URL = 'https://fortunova.interfn.com';
 
 async function verify() {
   const browser = await chromium.launch({ headless: true });
